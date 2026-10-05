@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171C" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CFA Tracker">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Aleen's CFA Tracker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.85em%27 font-size=%2290%27 text-anchor=%27middle%27 x=%2750%27>%E2%96%B3</text></svg>">
+<style>
+:root{
+  --paper:#F7F5F0; --surface:#FFFFFF; --ink:#1F2328; --muted:#6F7782; --faint:#A7ADB5;
+  --line:#E3E1DB; --line-strong:#CDCAC2; --accent:#1E4E8C; --accent-tint:#E6EEF8;
+  --good:#2E7D4F; --good-tint:#E3F2E8; --warn:#A8591A; --warn-tint:#FBEEDF;
+  --late:#B23A2B; --late-tint:#FBE6E2; --today-tint:#FFF6D6; --today-line:#E2C25A; --bar:#E9E6DF;
+  --on-accent:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14171C; --surface:#1B1F25; --ink:#E6E8EB; --muted:#9AA1AC; --faint:#666C76;
+    --line:#2A2E35; --line-strong:#3A3F48; --accent:#7EA6E8; --accent-tint:#1D2A40;
+    --good:#6FD39A; --good-tint:#16301F; --warn:#F0B270; --warn-tint:#33240F;
+    --late:#FF8B7A; --late-tint:#3A1C18; --today-tint:#2B2716; --today-line:#7D6A2A; --bar:#2A2E35;
+    --on-accent:#0B0E14;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14171C; --surface:#1B1F25; --ink:#E6E8EB; --muted:#9AA1AC; --faint:#666C76;
+  --line:#2A2E35; --line-strong:#3A3F48; --accent:#7EA6E8; --accent-tint:#1D2A40;
+  --good:#6FD39A; --good-tint:#16301F; --warn:#F0B270; --warn-tint:#33240F;
+  --late:#FF8B7A; --late-tint:#3A1C18; --today-tint:#2B2716; --today-line:#7D6A2A; --bar:#2A2E35;
+  --on-accent:#0B0E14;
+}
+
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 20px 80px;}
+button{font-family:inherit;}
+
+/* header */
+header{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;padding-bottom:14px;}
+header h1 .spark{background:linear-gradient(90deg,#2F6FB0,#7A4FB5,#B23A62,#E07A2E);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.rainbow{display:flex;gap:3px;height:12px;margin-bottom:4px;}
+.rainbow > div{position:relative;border-radius:3px;overflow:hidden;background:color-mix(in srgb,var(--tc) 35%,var(--surface));}
+.rainbow > div i{position:absolute;inset:0 auto 0 0;background:var(--tc);}
+.rainbow-cap{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;}
+header h1{font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;font-size:30px;margin:0;letter-spacing:-.01em;}
+header .sub{color:var(--muted);font-size:13px;margin-top:4px;}
+header .spacer{flex:1;}
+.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);}
+.dot.ok{background:var(--good);} .dot.local{background:var(--warn);}
+.phase{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:var(--accent-tint);color:var(--accent);margin-left:8px;vertical-align:2px;}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0;}
+.stat{--sc:var(--accent);background:color-mix(in srgb,var(--sc) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--sc) 25%,var(--line));border-top:4px solid var(--sc);border-radius:10px;padding:12px 16px 14px;}
+.stat.c-blue{--sc:#3B6FD8;} .stat.c-purple{--sc:#8B5CF6;} .stat.c-orange{--sc:#E07A2E;} .stat.c-green{--sc:#2E9E5B;} .stat.c-red{--sc:#D14B3A;} .stat.c-amber{--sc:#D99A1E;}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--sc);font-weight:700;}
+.stat .v{font-size:26px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;}
+.stat .v small{font-size:13px;font-weight:500;color:var(--muted);}
+.stat .h{font-size:12px;color:var(--muted);margin-top:2px;}
+.stat.late .v{color:var(--late);} .stat.good .v{color:var(--good);} .stat.warn .v{color:var(--warn);}
+.bigbar{position:relative;height:6px;background:var(--bar);border-radius:3px;margin-top:8px;}
+.bigbar i{display:block;height:100%;background:var(--accent);border-radius:3px;}
+.bigbar .seg{display:flex;height:100%;border-radius:3px;overflow:hidden;}
+.bigbar .seg i{border-radius:0;}
+.bigbar .mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;}
+
+/* today */
+.today{background:var(--today-tint);border:1px solid var(--today-line);border-radius:10px;padding:14px 16px;margin-bottom:22px;display:grid;grid-template-columns:1fr 1fr;gap:6px 28px;}
+.today .col h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;margin:6px 0 8px;color:var(--muted);}
+.today ul{margin:0 0 6px;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;}
+.today li{display:flex;gap:10px;align-items:baseline;font-size:14px;line-height:1.35;}
+.today .tcode{color:#fff;border-radius:4px;padding:0 5px;font-size:12.5px;}
+.today li .tag{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);min-width:64px;flex:none;}
+.today li.late .tag{color:var(--late);}
+.today li .go{margin-left:auto;flex:none;font-size:12px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:6px;padding:2px 8px;cursor:pointer;}
+.today li .go:hover{border-color:var(--accent);color:var(--accent);}
+.today .none{color:var(--muted);font-size:13.5px;margin-bottom:6px;}
+
+/* method */
+details.method{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:18px;}
+details.method summary{cursor:pointer;padding:11px 16px;font-weight:600;font-size:13.5px;}
+details.method .body{padding:0 18px 14px;font-size:13.5px;line-height:1.55;color:var(--ink);}
+details.method ol{margin:6px 0 10px;padding-left:20px;}
+details.method li{margin-bottom:4px;}
+details.method .src{font-size:12px;color:var(--muted);}
+details.method a{color:var(--accent);}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:14px;font-size:13px;color:var(--muted);}
+.controls label{display:flex;align-items:center;gap:6px;}
+.controls input{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:5px 7px;}
+.controls input[type=number]{width:56px;}
+.controls .spacer{flex:1;}
+.segbtn{display:inline-flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden;}
+.segbtn button{font-size:12.5px;border:0;background:var(--surface);color:var(--muted);padding:6px 11px;cursor:pointer;}
+.segbtn button+button{border-left:1px solid var(--line-strong);}
+.segbtn button.on{background:var(--ink);color:var(--paper);}
+.btn{font-size:13px;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);padding:7px 13px;border-radius:7px;cursor:pointer;}
+.btn.ghost{background:transparent;color:var(--accent);}
+.btn.confirm{background:var(--late);border-color:var(--late);}
+
+/* topics */
+.topic{--tc:var(--accent);background:var(--surface);border:1px solid color-mix(in srgb,var(--tc) 30%,var(--line));border-left:6px solid var(--tc);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.topic > summary{background:color-mix(in srgb,var(--tc) 10%,var(--surface));}
+.topic .name{color:color-mix(in srgb,var(--tc) 70%,var(--ink));}
+.topic > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:13px 16px;}
+.topic > summary::-webkit-details-marker{display:none;}
+.topic .code{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;color:#fff;border-radius:5px;padding:3px 7px;min-width:48px;text-align:center;}
+.topic .name{font-weight:600;font-size:15.5px;}
+.topic .meta{font-size:12px;color:var(--muted);}
+.topic .right{text-align:right;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;gap:14px;align-items:baseline;}
+.topic .right b{color:var(--ink);font-size:14px;}
+.topic .tbar{grid-column:1/-1;height:4px;background:var(--bar);border-radius:2px;overflow:hidden;}
+.topic .tbar i{display:block;height:100%;}
+.topic.complete .name::after{content:" ✓";color:var(--good);}
+
+.score{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;padding:1px 6px;border-radius:4px;}
+.score.good{background:var(--good-tint);color:var(--good);}
+.score.warn{background:var(--warn-tint);color:var(--warn);}
+.score.bad{background:var(--late-tint);color:var(--late);}
+.score.none{color:var(--faint);font-weight:500;}
+
+.rows{border-top:1px solid var(--line);}
+.ch, .colhead{display:grid;grid-template-columns:52px minmax(0,1fr) 128px repeat(3,44px) 58px 44px 26px;gap:0 8px;align-items:center;padding:7px 14px;}
+.colhead{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:color-mix(in srgb,var(--tc) 75%,var(--muted));font-weight:700;padding-top:9px;padding-bottom:6px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--tc) 5%,var(--surface));}
+.colhead span{text-align:center;}
+.colhead span:nth-child(-n+3){text-align:left;}
+.ch{border-bottom:1px solid var(--line);}
+.ch:last-child{border-bottom:0;}
+.ch.is-today{background:var(--today-tint);}
+.ch.is-late .date{color:var(--late);border-color:var(--late);}
+.ch.complete .title{color:var(--muted);}
+.ch .num{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
+.ch .title{outline:none;border-radius:4px;padding:2px 4px;margin-left:-4px;line-height:1.35;}
+.ch .title:focus,.ch .note:focus{background:var(--accent-tint);}
+.ch .note{grid-column:2/-1;font-size:12.5px;color:var(--muted);outline:none;border-radius:4px;padding:2px 4px;margin:2px 0 0 -4px;white-space:pre-wrap;}
+.ch .note:empty{display:none;}
+.ch.show-note .note:empty{display:block;}
+.ch .note:empty:before{content:attr(data-ph);color:var(--faint);}
+.ch .date{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:4px 5px;width:100%;}
+.ch .date:not(:focus):invalid{color:var(--faint);}
+.ch .addnote{border:0;background:none;color:var(--faint);cursor:pointer;font-size:15px;padding:0;line-height:1;}
+.ch .addnote.has{color:var(--accent);}
+.ch .addnote:hover{color:var(--accent);}
+.ch .pqscore{width:100%;font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:center;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:4px 2px;-moz-appearance:textfield;}
+.ch .pqscore::-webkit-outer-spin-button,.ch .pqscore::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.ch .pqscore.good{background:var(--good-tint);color:var(--good);border-color:transparent;}
+.ch .pqscore.warn{background:var(--warn-tint);color:var(--warn);border-color:transparent;}
+.ch .pqscore.bad{background:var(--late-tint);color:var(--late);border-color:transparent;}
+.ch .meta{grid-column:2/-1;font-size:11.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;}
+.ch .meta .ok{color:var(--good);}
+.ch .meta:empty{display:none;}
+
+.cb{justify-self:center;width:22px;height:22px;border-radius:6px;border:2px solid var(--line-strong);background:transparent;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;line-height:1;}
+.cb:hover{border-color:var(--tc);}
+.cb.on{background:var(--tc);border-color:var(--tc);}
+.cb.on.skim{background:color-mix(in srgb,var(--tc) 45%,var(--surface));border-color:transparent;}
+.cb.on.review{background:#D99A1E;border-color:#D99A1E;}
+.cb .lbl{display:none;}
+
+.topicfoot{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--tc) 6%,var(--surface));font-size:12.5px;color:var(--muted);}
+.topicfoot input{width:58px;font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;background:var(--surface);color:var(--ink);}
+
+.banner{background:var(--warn-tint);color:var(--warn);border-radius:8px;padding:10px 14px;font-size:13px;margin:16px 0 0;}
+.banner code{font-family:"IBM Plex Mono",monospace;font-size:12px;}
+.hidden{display:none !important;}
+
+@media (max-width:760px){
+  .wrap{padding:18px 14px 60px;}
+  header{position:relative;padding-bottom:10px;}
+  header h1{font-size:26px;padding-right:70px;}
+  header .sub{font-size:12.5px;}
+  .sync{position:absolute;top:8px;right:0;font-size:11px;}
+  .rainbow{height:10px;gap:2px;}
+  .rainbow-cap{justify-content:flex-end;}
+  .rainbow-cap span:first-child{display:none;}
+
+  .stats{grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0;}
+  .stat{padding:10px 12px 11px;}
+  .stat .k{font-size:10px;}
+  .stat .v{font-size:22px;}
+  .stat .h{font-size:11.5px;line-height:1.35;}
+
+  .today{grid-template-columns:1fr;padding:12px 14px;margin-bottom:16px;}
+  .today li{font-size:14px;gap:8px;}
+  .today li .tag{min-width:52px;font-size:11px;}
+  .today li .go{padding:6px 10px;font-size:13px;border-radius:8px;}
+
+  details.method .body{padding:0 14px 12px;font-size:13px;}
+
+  .controls{gap:10px;}
+  .controls label{flex:1 1 140px;}
+  .controls input{font-size:16px;flex:1;min-width:0;}
+  .controls .spacer{display:none;}
+  .segbtn{width:100%;}
+  .segbtn button{flex:1;padding:9px 4px;font-size:13px;}
+  .controls .btn{flex:1;padding:10px 8px;}
+
+  .topic{margin-bottom:12px;}
+  .topic > summary{grid-template-columns:auto 1fr;padding:12px 12px 12px 10px;}
+  .topic .name{font-size:15px;}
+  .topic .right{grid-column:1/-1;}
+  .colhead{display:none;}
+
+  /* chapter rows become small cards: number + date + note on top, title, then big tap targets */
+  .ch{display:flex;flex-wrap:wrap;align-items:center;gap:8px 6px;padding:12px 12px;}
+  .ch .num{order:1;font-size:12px;flex:1;}
+  .ch .date{order:2;width:auto;font-size:16px;padding:3px 6px;border-radius:8px;}
+  .ch.complete .date:invalid{display:none;}
+  .ch .addnote{order:3;font-size:18px;padding:4px 2px 4px 8px;}
+    .ch .title{order:4;flex:1 0 100%;font-size:16px;margin:0 0 2px -4px;}
+  .ch .cb{order:5;flex:1 1 0;width:auto;height:38px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted);gap:4px;}
+  .ch .cb.on{color:#fff;}
+  .ch .cb .lbl{display:inline;}
+  .ch .pqscore{order:5;flex:0 0 58px;height:38px;font-size:16px;border-radius:9px;}
+  .ch > span:empty{display:none;}
+  .ch .note{order:6;flex:1 0 100%;font-size:16px;margin:2px 0 0 -4px;}
+  .ch .meta{order:7;flex:1 0 100%;}
+  .topicfoot{padding:12px;}
+  .topicfoot input{font-size:16px;width:64px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1><span class="spark">Aleen's</span> CFA Tracker</h1>
+      <div class="sub" id="examline"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="sync"><span class="dot" id="syncdot"></span><span id="syncstate">Connecting…</span></div>
+  </header>
+  <div class="rainbow" id="rainbow"></div>
+  <div class="rainbow-cap"><span>Each block is a topic, sized by its exam weight and filled as modules are done</span><span id="rainbowpct"></span></div>
+
+  <div class="banner hidden" id="rulebanner"></div>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="today" id="today"></section>
+
+  <details class="method">
+    <summary>How this tracker works (the method)</summary>
+    <div class="body">
+      This follows the approach most prep providers recommend: roughly 300 hours of study, time weighted toward
+      the heavy topics, practice questions straight after each module, and a final phase of full mock exams.
+      <ol>
+        <li><b>Skim.</b> Before a module, read the Learning Outcome Statements and the summary so you know what you'll be tested on.</li>
+        <li><b>Study.</b> Read the module properly and work through the examples. The schedule is built around this step.</li>
+        <li><b>Practice Qs.</b> Do the end-of-module or question-bank questions the same day or the next, and enter your score.
+          <span class="score good">70%+</span> is on track, <span class="score warn">60–69</span> needs a second look, and
+          <span class="score bad">&lt;60</span> is a weak area that gets priority in final review.</li>
+        <li><b>Recall checks.</b> 7 days after your practice Qs, and again 3 weeks later, a module shows up under <i>Recall checks</i>.
+          Do 5–10 quick questions or explain the key formulas from memory. Spaced repetition like this is the
+          cheapest way to stop early topics fading by February.</li>
+        <li><b>Topic test.</b> When a whole topic is finished, do 20–30 mixed questions on it and enter the score at the bottom of that topic.</li>
+        <li><b>Final review &amp; mocks.</b> The last weeks before the exam are kept free for mixed review and 3 full timed mocks, with repair weeks on your weakest topics in between.
+          Candidates who score 70%+ on mocks pass at a very high rate. In this phase, tick <b>Review</b> on each module as you revisit it. Weakest modules come first.</li>
+      </ol>
+      <b>Readiness</b> is your scores weighted by each topic's share of the exam, so on the <b>2027</b> weights. Quant is now 11–14% (up from 6–9%), so a weak Quant score costs as much as a weak FSA one, and Ethics (10–15%) still outweighs Derivatives (6–9%).
+      Use <b>Re-plan remaining</b> whenever you fall behind or get ahead: it spreads the unstudied modules evenly up to the review phase.
+      <div class="src" style="margin-top:8px">Sources:
+        <a href="https://300hours.com/cfa-level-1-study-order/" target="_blank" rel="noopener">300Hours: study order</a> ·
+        <a href="https://analystprep.com/blog/cfa-level-1-6-month-study-plan/" target="_blank" rel="noopener">AnalystPrep: study plan</a> ·
+        <a href="https://soleadea.org/cfa-level-1/topic-weights" target="_blank" rel="noopener">Soleadea: topic weights</a> ·
+        <a href="https://www.schweser.com/cfa/level-1" target="_blank" rel="noopener">Kaplan Schweser</a>
+      </div>
+    </div>
+  </details>
+
+  <div class="controls">
+    <label>Exam <input type="date" id="examdate"></label>
+    <label>Review &amp; mock days <input type="number" id="bufferdays" min="0" max="90"></label>
+    <span class="spacer"></span>
+    <div class="segbtn" id="filter">
+      <button data-f="all" class="on">All</button>
+      <button data-f="left">To study</button>
+      <button data-f="week">Next 7 days</button>
+      <button data-f="weak">Weak areas</button>
+    </div>
+    <button class="btn" id="replan">Re-plan remaining</button>
+    <button class="btn ghost" id="backup" title="Download a copy of all progress">Backup</button>
+    <button class="btn ghost" id="restore" title="Load a backup file">Restore</button>
+    <input type="file" id="restorefile" accept="application/json,.json" hidden>
+  </div>
+
+  <main id="topics"></main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ---------- curriculum ----------
+  // The 10 Level I topics and their 102 learning modules for the 2027 exam,
+  // listed in study order. `mid` is the midpoint of the 2027 exam-weight range,
+  // used for readiness. `w` scales study time per module (heavier topics get more).
+  var TOPICS = [
+    {key:'qm',  code:'QM',  name:'Quantitative Methods', weight:'11–14%', mid:12.5, color:'#2F5FA8', w:1.1, mods:[
+      'Returns of Financial Assets and Instruments','Types of Financial Returns','Benchmarking Returns',
+      'The Time Value of Money in Finance','Statistical Characteristics of Asset Returns',
+      'Statistical Distributions for Financial Asset Prices and Returns','Estimation and Hypothesis Testing',
+      'The Return and Risk of a Financial Portfolio','Simulation of Financial Asset Prices and Returns',
+      'Applications of Simple Linear Regression in Finance','Introduction to Financial Data Science']},
+    {key:'pc',  code:'PC',  name:'Portfolio Construction', weight:'8–12%', mid:10, color:'#B5574A', w:1.1, mods:[
+      'Portfolio Risk and Return: Part I','Portfolio Risk and Return: Part II','Portfolio Management: An Overview',
+      'Basics of Portfolio Planning and Construction','The Behavioral Biases of Individuals','Introduction to Risk Management']},
+    {key:'fsa', code:'FSA', name:'Financial Statement Analysis', weight:'11–14%', mid:12.5, color:'#B5485E', w:1.5, mods:[
+      'Introduction to Financial Statement Analysis','Analyzing Income Statements','Analyzing Balance Sheets',
+      'Analyzing Statements of Cash Flows I','Analyzing Statements of Cash Flows II','Analysis of Inventories',
+      'Analysis of Long-Term Assets','Topics in Long-Term Liabilities and Equity','Analysis of Income Taxes',
+      'Financial Reporting Quality','Financial Analysis Techniques','Introduction to Financial Statement Modeling']},
+    {key:'cf',  code:'CF',  name:'Corporate Finance', weight:'6–9%', mid:7.5, color:'#9C7526', w:0.9, mods:[
+      'Organizational Forms, Issuer Features, and Ownership','Investors and Other Stakeholders',
+      'Corporate Governance: Conflicts, Mechanisms, Risks, Benefits','Working Capital and Liquidity',
+      'Capital Investments and Capital Allocation','Capital Structure','Business Models']},
+    {key:'eq',  code:'EQ',  name:'Equities', weight:'11–14%', mid:12.5, color:'#2E7D53', w:1.1, mods:[
+      'Equity Instrument Features','Equity Jurisdictions, Classes, and the Voting Process','Equity Issuance and Trading',
+      'Sources of Equity Returns','Introduction to Equity Valuation','Discounted Cash Flow (DCF) and Growth Models',
+      'Relative Value Equity Valuation Approaches','Financial Statement Forecasting in Equity Valuation',
+      'Industry and Competitive Analysis','Company Analysis: Past, Present, and Future','Equity Analyst Research Reports',
+      'CAPM, Market Model, and Other Factor-Based Equity Models']},
+    {key:'fi',  code:'FI',  name:'Fixed Income', weight:'11–14%', mid:12.5, color:'#2A7E89', w:0.9, mods:[
+      'Fixed-Income Instrument Features','Fixed-Income Cash Flows and Types','Fixed-Income Issuance and Trading',
+      'Fixed-Income Markets for Corporate Issuers','Fixed-Income Markets for Government Issuers',
+      'Bond Valuation: Prices and Yields','Yield and Yield Spread Measures for Fixed-Rate Bonds',
+      'Yield and Yield Spread Measures for Floating-Rate Instruments','Term Structure: Spot, Par, and Forward Curves',
+      'Interest Rate Risk and Return','Yield-Based Bond Duration Measures and Properties',
+      'Yield-Based Bond Convexity and Portfolio Properties','Curve-Based and Empirical Risk Measures','Credit Risk',
+      'Credit Analysis for Government Issuers','Credit Analysis for Corporate Issuers','Fixed-Income Securitization',
+      'Asset-Backed Security (ABS) Features','Mortgage-Backed Security (MBS) Features']},
+    {key:'ai',  code:'AI',  name:'Alternative Investments', weight:'6–9%', mid:7.5, color:'#6273C4', w:1, mods:[
+      'Alternative Investment Features, Methods, Structures','Alternative Investment Performance and Returns',
+      'Investments in Private Capital: Equity and Debt','Real Estate and Infrastructure','Natural Resources',
+      'Hedge Funds','Introduction to Digital Assets']},
+    {key:'ec',  code:'EC',  name:'Economics', weight:'6–9%', mid:7.5, color:'#7557B5', w:1, mods:[
+      'The Firm and Market Structures','Understanding Business Cycles','Fiscal Policy','Monetary Policy',
+      'Introduction to Geopolitics','International Trade','Capital Flows and the FX Market','Exchange Rate Calculations']},
+    {key:'de',  code:'DE',  name:'Derivatives & Risk Mgmt', weight:'6–9%', mid:7.5, color:'#5B7392', w:0.9, mods:[
+      'Derivative Instrument and Market Features','Forward Commitment and Contingent Claim Features',
+      'Derivative Benefits, Risks, Issuer and Investor Uses','Arbitrage, Replication, and the Cost of Carry',
+      'Pricing and Valuation of Forward Contracts','Pricing and Valuation of Futures Contracts',
+      'Pricing and Valuation of Interest Rate and Other Swaps','Pricing and Valuation of Options',
+      'Option Replication Using Put–Call Parity','Valuing a Derivative Using a One-Period Binomial Model']},
+    {key:'et',  code:'ET',  name:'Ethics', weight:'10–15%', mid:12.5, color:'#95509F', w:1.2, mods:[
+      'Ethics and Trust in the Investment Profession','Code of Ethics and Standards of Professional Conduct',
+      'Standard I: Professionalism','Standard II: Integrity of Capital Markets','Standard III: Duties to Clients',
+      'Standard IV: Duties to Employers','Standard V: Investment Analysis, Recommendations, and Actions',
+      'Standard VI: Conflicts of Interest','Standard VII: Responsibilities as Member or Candidate',
+      'Application of the Code and Standards: Level I']},
+    {key:'rev', code:'FINAL', name:'Final Review & Mock Exams', weight:'', mid:0, color:'#555B63', w:1, review:true, mods:[
+      'Mock exam 1: full, timed','Mock 1 debrief: redo every wrong question, log weak modules',
+      'Repair week: your two weakest topics','Mock exam 2: full, timed','Mock 2 debrief + repair weak modules',
+      'Mock exam 3: full, timed','Mock 3 debrief + formula sheet','Ethics: re-read Standards I–VII + practice questions',
+      'Taper: light review, rest, exam-day logistics']}
+  ];
+  var HEAVY = {'qm-4':1.2, 'fsa-4':1.4, 'fsa-5':1.4, 'fsa-9':1.3, 'fi-9':1.3, 'fi-11':1.3, 'eq-6':1.2, 'et-2':1.3, 'et-10':1.3};
+  var DEFAULT_SETTINGS = {exam:'2027-02-22', buffer:22, tt:{}};
+  var GOOD = 70, OK = 60;
+
+  // Starting schedule: the week-by-week study plan (week starts Sunday).
+  // Each week's modules are spread across its days; Re-plan remaining overrides this.
+  var WEEK_PLAN = [
+    ['2026-08-30', [['qm',[1,2,3,4]]]],
+    ['2026-09-06', [['qm',[5,6]]]],
+    ['2026-09-13', [['qm',[7,8]]]],
+    ['2026-09-20', [['qm',[9]]]],
+    ['2026-09-27', [['qm',[10,11]],['pc',[1,2]]]],
+    ['2026-10-04', [['fsa',[1,2,3]]]],
+    ['2026-10-11', [['fsa',[4,5,6]]]],
+    ['2026-10-18', [['fsa',[7,8,9]]]],
+    ['2026-10-25', [['fsa',[10,11,12]]]],
+    ['2026-11-01', [['cf',[1,2,3,4,5,6,7]]]],
+    ['2026-11-08', [['eq',[1,2,3,4]]]],
+    ['2026-11-15', [['eq',[5,6,7,8]]]],
+    ['2026-11-22', [['eq',[9,10,11,12]]]],
+    ['2026-11-29', [['fi',[1,2,3,4,5]]]],
+    ['2026-12-06', [['fi',[6,7,8,9,10]]]],
+    ['2026-12-13', [['fi',[11,12,13,14,15]]]],
+    ['2026-12-20', [['fi',[16,17,18,19]]]],
+    ['2026-12-27', [['pc',[3,4,5,6]],['ai',[1,2,3]]]],
+    ['2027-01-03', [['ai',[4,5,6,7]],['ec',[1,2,3,4]]]],
+    ['2027-01-10', [['ec',[5,6,7,8]],['de',[1,2,3,4]]]],
+    ['2027-01-17', [['de',[5,6,7,8,9,10]],['et',[1,2]]]],
+    ['2027-01-24', [['et',[3,4,5,6,7]]]],
+    ['2027-01-31', [['et',[8,9,10]],['rev',[1]]]],
+    ['2027-02-07', [['rev',[2,3]]]],
+    ['2027-02-14', [['rev',[4,5,6,7]]]],
+    ['2027-02-21', [['rev',[8,9]]]]
+  ];
+  var FIXED_DATES = {'rev-1':'2027-02-06', 'rev-2':'2027-02-07', 'rev-3':'2027-02-09', 'rev-4':'2027-02-14', 'rev-5':'2027-02-15',
+    'rev-6':'2027-02-19', 'rev-7':'2027-02-20', 'rev-8':'2027-02-21', 'rev-9':'2027-02-21'};
+  function weekPlanDates(){
+    var out = {};
+    WEEK_PLAN.forEach(function(wk){
+      var ids = [];
+      wk[1].forEach(function(g){ g[1].forEach(function(n){ ids.push(g[0] + '-' + n); }); });
+      ids.forEach(function(id, j){ out[id] = FIXED_DATES[id] || addDays(wk[0], Math.floor(j * 7 / ids.length)); });
+    });
+    return out;
+  }
+
+  var topicByKey = {};
+  TOPICS.forEach(function(t){ topicByKey[t.key] = t; });
+  function isRev(c){ return topicByKey[c.topic] && topicByKey[c.topic].review; }
+  function isMock(c){ return isRev(c) && /^Mock exam/i.test(c.title); }
+
+  // ---------- small helpers ----------
+  function iso(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+  function parse(s){ var p = s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function addDays(s, n){ var d = parse(s); d.setDate(d.getDate()+n); return iso(d); }
+  function daysBetween(a, b){ return Math.round((parse(b) - parse(a)) / 86400000); }
+  function todayISO(){ return iso(new Date()); }
+  function pretty(s, dow){ return s ? parse(s).toLocaleDateString(undefined, dow ? {weekday:'short', month:'short', day:'numeric'} : {month:'short', day:'numeric'}) : ''; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function num(v){ return (v === '' || v == null || isNaN(+v)) ? null : +v; }
+  function band(v){ return v == null ? 'none' : v >= GOOD ? 'good' : v >= OK ? 'warn' : 'bad'; }
+  function avg(a){ return a.length ? a.reduce(function(s,x){ return s+x; }, 0) / a.length : null; }
+
+  // Chapter state
+  function studied(c){ return isRev(c) ? !!c.done : !!c.study; }
+  function complete(c){ return isRev(c) ? !!c.done : !!(c.study && c.pq); }
+
+  // ---------- seed ----------
+  function seedDocs(){
+    var docs = {}, order = 0;
+    TOPICS.forEach(function(t){
+      t.mods.forEach(function(title, i){
+        var n = i + 1, id = t.key + '-' + n;
+        var before = false;
+        docs[id] = {
+          topic: t.key, num: n, title: title, order: (order += 10), date: '',
+          skim: before, study: before, pq: before, pqScore: '', review: false, done: false,
+          studyOn: '', pqOn: '', reviewOn: '', recall1On: '', recall2On: '',
+          note: '', weight: (HEAVY[id] || 1) * t.w
+        };
+      });
+    });
+    return docs;
+  }
+
+  // ---------- planner ----------
+  // Spreads every unstudied chapter between `from` and (exam − review days),
+  // proportional to its weight; the final-review items fill the review days.
+  function plan(items, settings, from){
+    var exam = settings.exam, buffer = Math.max(0, settings.buffer|0);
+    var contentEnd = addDays(exam, -buffer);
+    if(contentEnd <= from) contentEnd = addDays(from, 1);
+    var span = daysBetween(from, contentEnd);
+    var content = items.filter(function(c){ return !studied(c) && !isRev(c); });
+    var review = items.filter(function(c){ return !studied(c) && isRev(c); });
+    var total = content.reduce(function(s,c){ return s + (c.weight||1); }, 0) || 1;
+    var cum = 0, out = {};
+    content.forEach(function(c){
+      out[c.id] = addDays(from, Math.min(span-1, Math.floor(cum / total * span)));
+      cum += c.weight || 1;
+    });
+    var rSpan = Math.max(1, daysBetween(contentEnd, exam));
+    review.forEach(function(c, i){
+      out[c.id] = addDays(contentEnd, Math.min(rSpan-1, Math.floor(i * rSpan / review.length)));
+    });
+    return out;
+  }
+
+  // ---------- storage ----------
+  // To sync across devices, paste a Firebase web config here (Firestore,
+  // collection below). Left as null, progress is saved in this browser only;
+  // use Backup / Restore to move it between devices.
+  var FIREBASE_CONFIG = null;
+  var COLLECTION = 'cfa2027';
+
+  var LS_KEY = 'aleen-cfa-2027-v1';
+  var state = {items: {}, settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), mode: 'connecting'};
+  var db = null, col = null;
+
+  function lsLoad(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){ return null; } }
+  function lsSave(){ try { localStorage.setItem(LS_KEY, JSON.stringify({items: state.items, settings: state.settings})); } catch(e){} }
+
+  function write(patches, settingsPatch){
+    Object.keys(patches).forEach(function(id){ Object.assign(state.items[id], patches[id]); });
+    if(settingsPatch){
+      if(settingsPatch.tt) state.settings.tt = Object.assign({}, state.settings.tt, settingsPatch.tt);
+      Object.keys(settingsPatch).forEach(function(k){ if(k !== 'tt') state.settings[k] = settingsPatch[k]; });
+    }
+    if(state.mode === 'cloud'){
+      var b = db.batch();
+      Object.keys(patches).forEach(function(id){ b.set(col.doc(id), patches[id], {merge:true}); });
+      if(settingsPatch) b.set(col.doc('_settings'), settingsPatch, {merge:true});
+      b.commit().catch(function(e){ console.error(e); });
+    } else {
+      lsSave();
+    }
+    render();
+  }
+  function patchOne(id, p){ var o = {}; o[id] = p; write(o); }
+
+  function seedMissing(existing, settings){
+    // Only creates chapters that don't exist yet, so this can never duplicate.
+    var seeds = seedDocs(), missing = {};
+    Object.keys(seeds).forEach(function(id){ if(!existing[id]) missing[id] = seeds[id]; });
+    var newOnes = Object.keys(missing).map(function(id){ return Object.assign({id:id}, missing[id]); })
+      .sort(function(a,b){ return a.order - b.order; });
+    var dates = plan(newOnes, settings, todayISO()), fixed = weekPlanDates();
+    Object.keys(missing).forEach(function(id){ missing[id].date = fixed[id] || dates[id] || ''; });
+    return missing;
+  }
+
+  function startLocal(reason){
+    state.mode = 'local';
+    var saved = lsLoad();
+    if(saved){
+      state.items = saved.items || {};
+      state.settings = Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), saved.settings);
+    }
+    Object.assign(state.items, seedMissing(state.items, state.settings));
+    lsSave();
+    if(reason){
+      var b = document.getElementById('rulebanner');
+      b.textContent = 'Saving in this browser only (' + reason + ').';
+      b.classList.remove('hidden');
+    }
+    render();
+  }
+
+  function startCloud(){
+    try {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore();
+      col = db.collection(COLLECTION);
+    } catch(e){ startLocal('Firebase unavailable'); return; }
+
+    var first = true;
+    col.onSnapshot(function(snap){
+      var items = {}, settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), hasSettings = false;
+      snap.docs.forEach(function(d){
+        if(d.id === '_settings'){ hasSettings = true; Object.assign(settings, d.data()); }
+        else items[d.id] = d.data();
+      });
+      if(first){
+        first = false;
+        state.mode = 'cloud';
+        document.getElementById('rulebanner').classList.add('hidden');
+        var saved = lsLoad(), batch = db.batch(), writes = 0;
+        if(!Object.keys(items).length && saved && saved.items && Object.keys(saved.items).length){
+          // Carry over anything saved locally before the Firestore rule existed.
+          Object.keys(saved.items).forEach(function(id){ batch.set(col.doc(id), saved.items[id]); writes++; });
+          batch.set(col.doc('_settings'), Object.assign({}, settings, saved.settings));
+          batch.commit();
+          return;
+        }
+        var missing = seedMissing(items, settings);
+        Object.keys(missing).forEach(function(id){ batch.set(col.doc(id), missing[id]); writes++; });
+        if(!hasSettings){ batch.set(col.doc('_settings'), settings); writes++; }
+        if(writes){ batch.commit(); return; }
+      }
+      state.items = items;
+      state.settings = settings;
+      render();
+    }, function(err){
+      if(state.mode !== 'local') startLocal(err && err.code === 'permission-denied' ? 'the database rule isn\'t published yet' : 'offline');
+    });
+  }
+
+  // ---------- derived numbers ----------
+  function list(){
+    return Object.keys(state.items).map(function(id){ return Object.assign({id:id}, state.items[id]); })
+      .sort(function(a,b){ return a.order - b.order; });
+  }
+  // A topic's score: its topic test if taken, otherwise the average of its chapter practice scores.
+  function topicScore(t, chs){
+    var tt = num((state.settings.tt || {})[t.key]);
+    if(tt != null) return {v: tt, src: 'topic test'};
+    var a = avg(chs.map(function(c){ return num(c.pqScore); }).filter(function(v){ return v != null; }));
+    return {v: a, src: 'module Qs'};
+  }
+  function readiness(all){
+    var sw = 0, sv = 0;
+    TOPICS.forEach(function(t){
+      if(t.review) return;
+      var s = topicScore(t, all.filter(function(c){ return c.topic === t.key; }));
+      if(s.v != null){ sw += t.mid; sv += t.mid * s.v; }
+    });
+    var total = TOPICS.reduce(function(s,t){ return s + t.mid; }, 0);
+    return {v: sw ? sv / sw : null, coverage: sw / total};
+  }
+  function recallDue(c, today){
+    if(isRev(c) || !c.pq || !c.pqOn) return null;
+    if(!c.recall1On && addDays(c.pqOn, 7) <= today) return 1;
+    if(c.recall1On && !c.recall2On && addDays(c.recall1On, 21) <= today) return 2;
+    return null;
+  }
+
+  // ---------- render ----------
+  var filter = 'all';
+  var openTopics = null;
+  try { openTopics = JSON.parse(localStorage.getItem('aleen-cfa-2027-open') || 'null'); } catch(e){}
+  var pendingReplan = false;
+
+  function render(){
+    var all = list(), today = todayISO(), s = state.settings;
+    var dot = document.getElementById('syncdot'), st = document.getElementById('syncstate');
+    dot.className = 'dot ' + (state.mode === 'cloud' ? 'ok' : state.mode === 'local' ? 'local' : '');
+    st.textContent = state.mode === 'cloud' ? 'Synced' : state.mode === 'local' ? 'Saved in this browser' : 'Connecting…';
+    if(!all.length) return;
+
+    var main = document.getElementById('topics');
+    var ae = document.activeElement;
+    var typing = ae && main.contains(ae) && (ae.isContentEditable || ae.classList.contains('pqscore') || ae.classList.contains('ttscore'));
+
+    var exam = document.getElementById('examdate'), buf = document.getElementById('bufferdays');
+    if(ae !== exam) exam.value = s.exam;
+    if(ae !== buf) buf.value = s.buffer;
+
+    var reviewStart = addDays(s.exam, -s.buffer);
+    var daysLeft = daysBetween(today, s.exam);
+    var inReview = today >= reviewStart;
+    document.getElementById('examline').innerHTML =
+      'Level I · exam ' + esc(pretty(s.exam, true)) + ', ' + parse(s.exam).getFullYear() + ' · review phase from ' + esc(pretty(reviewStart)) +
+      '<span class="phase">' + (daysLeft < 0 ? 'Exam done' : inReview ? 'Review phase' : 'Study phase') + '</span>';
+
+    // ---- stats ----
+    var content = all.filter(function(c){ return !isRev(c); });
+    var nStudied = content.filter(studied).length, nComplete = content.filter(complete).length;
+    var nReviewed = content.filter(function(c){ return c.review; }).length;
+    var late = all.filter(function(c){ return !studied(c) && c.date && c.date < today; });
+    var left = content.length - nStudied;
+    var studyDaysLeft = Math.max(0, daysBetween(today, reviewStart));
+    var pace = studyDaysLeft ? left / studyDaysLeft * 7 : left;
+    var r = readiness(all);
+    var mocks = all.filter(isMock).map(function(c){ return num(c.pqScore); }).filter(function(v){ return v != null; });
+
+    document.getElementById('rainbow').innerHTML = TOPICS.filter(function(t){ return !t.review; }).map(function(t){
+      var chs = content.filter(function(c){ return c.topic === t.key; });
+      var p = chs.filter(complete).length / chs.length * 100;
+      return '<div style="--tc:'+t.color+';flex:'+t.mid+'" title="'+esc(t.name)+' · '+t.weight+' · '+Math.round(p)+'% done"><i style="width:'+p+'%"></i></div>';
+    }).join('');
+    document.getElementById('rainbowpct').textContent = Math.round(nComplete / content.length * 100) + '% of modules done';
+
+    var statHTML = '';
+    statHTML += '<div class="stat c-blue"><div class="k">Modules studied</div><div class="v">'+nStudied+' <small>/ '+content.length+'</small></div>' +
+      '<div class="h">'+nComplete+' with practice Qs · '+nReviewed+' final-reviewed</div>' +
+      '<div class="bigbar"><div class="seg"><i style="width:'+(nComplete/content.length*100)+'%;background:var(--good)"></i>' +
+      '<i style="width:'+((nStudied-nComplete)/content.length*100)+'%;background:var(--warn)"></i></div></div></div>';
+    statHTML += '<div class="stat '+(late.length ? 'late c-red' : 'good c-green')+'"><div class="k">Schedule</div><div class="v">' +
+      (late.length ? late.length + ' <small>behind</small>' : 'On track') + '</div><div class="h">' +
+      (inReview ? 'Content phase finished' : pace.toFixed(1) + ' modules / week needed') + '</div></div>';
+    statHTML += '<div class="stat c-purple '+(r.v == null ? '' : band(r.v) === 'good' ? 'good' : band(r.v) === 'warn' ? 'warn' : 'late')+'"><div class="k">Readiness</div><div class="v">' +
+      (r.v == null ? '—' : Math.round(r.v) + '<small>%</small>') + '</div><div class="h">' +
+      (r.v == null ? 'Enter practice scores to see this' : 'weighted by exam share · ' + Math.round(r.coverage*100) + '% of exam measured') + '</div>' +
+      '<div class="bigbar"><i style="width:'+(r.v||0)+'%;background:var(--'+(r.v==null?'faint':band(r.v)==='good'?'good':band(r.v)==='warn'?'warn':'late')+')"></i><span class="mark" style="left:'+GOOD+'%" title="70% target"></span></div></div>';
+    statHTML += '<div class="stat c-orange"><div class="k">Days to exam</div><div class="v">'+Math.max(0, daysLeft)+'</div><div class="h">' +
+      (mocks.length ? 'Mock avg ' + Math.round(avg(mocks)) + '% (' + mocks.length + ' of 3)' : (studyDaysLeft + ' study days, then ' + s.buffer + ' for review')) + '</div></div>';
+    document.getElementById('stats').innerHTML = statHTML;
+
+    // ---- today ----
+    var li = function(c, cls, tag, btn){
+      var t = topicByKey[c.topic];
+      return '<li class="'+cls+'"><span class="tag">'+esc(tag)+'</span><span><b class="tcode" style="background:'+t.color+'">'+t.code+' '+c.num+'</b> '+esc(c.title)+'</span>' +
+        (btn ? '<button class="go" data-go="'+btn+'" data-id="'+c.id+'">'+(btn==='study'?'Studied':btn==='done'?'Done':'✓ Recalled')+'</button>' : '') + '</li>';
+    };
+    var due = all.filter(function(c){ return !studied(c) && c.date && c.date <= today; });
+    var nextUp = all.filter(function(c){ return !studied(c) && c.date > today; }).sort(function(a,b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : a.order - b.order; });
+    var needQs = content.filter(function(c){ return c.study && !c.pq; });
+    var recalls = content.map(function(c){ return {c:c, n:recallDue(c, today)}; }).filter(function(x){ return x.n; });
+    var weak = content.filter(function(c){ var v = num(c.pqScore); return v != null && v < GOOD && !c.review; })
+      .sort(function(a,b){ return num(a.pqScore) - num(b.pqScore); });
+
+    var col1 = '<h2>Today · ' + esc(pretty(today, true)) + '</h2>';
+    if(due.length){
+      col1 += '<ul>' + due.map(function(c){
+        return c.date < today ? li(c, 'late', 'late ' + pretty(c.date), isRev(c) ? 'done' : 'study') : li(c, '', 'study', isRev(c) ? 'done' : 'study');
+      }).join('') + '</ul>';
+    } else {
+      col1 += '<div class="none">Nothing scheduled today.</div>';
+    }
+    if(nextUp.length) col1 += '<h2>Up next</h2><ul>' + nextUp.slice(0, 3).map(function(c){ return li(c, '', pretty(c.date, true)); }).join('') + '</ul>';
+
+    var col2 = '';
+    if(needQs.length) col2 += '<h2>Practice Qs to do</h2><ul>' + needQs.slice(0, 4).map(function(c){ return li(c, 'late', 'Qs'); }).join('') + '</ul>';
+    col2 += '<h2>Recall checks</h2>';
+    col2 += recalls.length
+      ? '<ul>' + recalls.slice(0, 5).map(function(x){ return li(x.c, '', x.n === 1 ? '1 week' : '1 month', 'recall'); }).join('') + '</ul>'
+      : '<div class="none">None due. Modules show up here 7 days after their practice Qs.</div>';
+    if(weak.length) col2 += '<h2>Weak spots (under 70%)</h2><ul>' + weak.slice(0, 4).map(function(c){ return li(c, 'late', c.pqScore + '%'); }).join('') + '</ul>';
+    document.getElementById('today').innerHTML = '<div class="col">' + col1 + '</div><div class="col">' + col2 + '</div>';
+
+    if(typing) return; // don't redraw rows under the cursor; the blur re-renders
+
+    // ---- topics ----
+    var weekEnd = addDays(today, 7);
+    main.innerHTML = TOPICS.map(function(t){
+      var chs = all.filter(function(c){ return c.topic === t.key; });
+      var dn = chs.filter(complete).length;
+      var shown = chs.filter(function(c){
+        if(filter === 'left') return !studied(c);
+        if(filter === 'week') return !complete(c) && c.date && c.date <= weekEnd;
+        if(filter === 'weak') return !isRev(c) && num(c.pqScore) != null && num(c.pqScore) < GOOD;
+        return true;
+      });
+      if(filter !== 'all' && !shown.length) return '';
+      var dated = chs.map(function(c){ return c.date; }).filter(Boolean).sort();
+      var range = dated.length ? pretty(dated[0]) + ' – ' + pretty(dated[dated.length-1]) : 'no dates';
+      var isOpen = filter !== 'all' ? true : (openTopics ? openTopics.indexOf(t.key) !== -1 : dn < chs.length);
+      var sc = t.review ? null : topicScore(t, chs);
+      var head = t.review
+        ? '<div class="colhead"><span>#</span><span>Item</span><span>Day</span><span></span><span></span><span></span><span>Score</span><span>Done</span><span></span></div>'
+        : '<div class="colhead"><span>#</span><span>Module</span><span>Day</span><span>Skim</span><span>Study</span><span>Qs</span><span>Score</span><span>Review</span><span></span></div>';
+      var foot = t.review ? '' :
+        '<div class="topicfoot"><label>Topic test (20–30 mixed Qs) <input class="ttscore" type="number" min="0" max="100" data-topic="'+t.key+'" value="'+esc((s.tt||{})[t.key] == null ? '' : s.tt[t.key])+'" placeholder="%"></label>' +
+        '<span>' + (sc.v == null ? 'No scores yet' : 'Topic score <span class="score '+band(sc.v)+'">'+Math.round(sc.v)+'%</span> from ' + sc.src) + '</span></div>';
+      return '<details class="topic'+(dn===chs.length?' complete':'')+'" style="--tc:'+t.color+'" data-topic="'+t.key+'"'+(isOpen?' open':'')+'>' +
+        '<summary><span class="code" style="background:'+t.color+'">'+t.code+'</span>' +
+        '<div><div class="name">'+esc(t.name)+'</div><div class="meta">'+(t.weight ? 'Exam weight '+t.weight+' · ' : '')+range+'</div></div>' +
+        '<div class="right">' + (sc ? '<span class="score '+band(sc.v)+'">'+(sc.v==null?'—':Math.round(sc.v)+'%')+'</span>' : '') +
+        '<span><b>'+dn+'</b> / '+chs.length+' done</span></div>' +
+        '<div class="tbar"><i style="width:'+(dn/chs.length*100)+'%;background:'+t.color+'"></i></div></summary>' +
+        '<div class="rows">' + head + shown.map(function(c){ return rowHTML(c, t, today); }).join('') + '</div>' + foot + '</details>';
+    }).join('');
+  }
+
+  function cb(c, field, label, extra){
+    var on = !!c[field];
+    return '<button class="cb '+(extra||'')+(on?' on':'')+'" data-act="toggle" data-field="'+field+'" title="'+label+'">'+(on?'✓':'')+'<span class="lbl">'+label+'</span></button>';
+  }
+
+  function rowHTML(c, t, today){
+    var cls = 'ch';
+    if(complete(c)) cls += ' complete';
+    if(!studied(c) && c.date === today) cls += ' is-today';
+    if(!studied(c) && c.date && c.date < today) cls += ' is-late';
+    var v = num(c.pqScore);
+    var scoreInput = '<input class="pqscore '+(v==null?'':band(v))+'" type="number" min="0" max="100" placeholder="%" value="'+esc(c.pqScore)+'" title="Score %">';
+    var bits = [];
+    if(!isRev(c)){
+      if(c.studyOn) bits.push('<span>Studied ' + pretty(c.studyOn) + '</span>');
+      if(c.pqOn) bits.push('<span>Qs ' + pretty(c.pqOn) + '</span>');
+      if(c.recall1On) bits.push('<span class="ok">Recall ✓ ' + pretty(c.recall1On) + '</span>');
+      if(c.recall2On) bits.push('<span class="ok">Recall ✓ ' + pretty(c.recall2On) + '</span>');
+      if(c.reviewOn) bits.push('<span class="ok">Final review ' + pretty(c.reviewOn) + '</span>');
+    } else if(c.doneOn){
+      bits.push('<span class="ok">Done ' + pretty(c.doneOn) + '</span>');
+    }
+    var mid = isRev(c)
+      ? '<span></span><span></span><span></span>' + (isMock(c) ? scoreInput : '<span></span>') + cb(c, 'done', 'Done', 'review')
+      : cb(c, 'skim', 'Skim', 'skim') + cb(c, 'study', 'Study') + cb(c, 'pq', 'Qs') + scoreInput + cb(c, 'review', 'Review', 'review');
+    return '<div class="'+cls+'" data-id="'+c.id+'">' +
+      '<span class="num">'+t.code+' '+c.num+'</span>' +
+      '<div class="title" contenteditable="true" data-field="title" spellcheck="false">'+esc(c.title)+'</div>' +
+      '<input class="date" type="date" required value="'+esc(c.date)+'" title="Scheduled day">' +
+      mid +
+      '<button class="addnote'+(c.note?' has':'')+'" data-act="note" title="Comments">✎</button>' +
+      '<div class="note" contenteditable="true" data-field="note" data-ph="Comments: what was hard, formulas to remember, page refs…">'+esc(c.note)+'</div>' +
+      '<div class="meta">'+bits.join('')+'</div>' +
+      '</div>';
+  }
+
+  // ---------- interactions ----------
+  var ON_FIELD = {study:'studyOn', pq:'pqOn', review:'reviewOn', done:'doneOn'};
+  function toggle(id, field){
+    var c = state.items[id], on = !c[field], p = {};
+    p[field] = on;
+    if(ON_FIELD[field]) p[ON_FIELD[field]] = on ? todayISO() : '';
+    // Studying implies skimming; doing Qs implies studying.
+    if(on && field === 'study') p.skim = true;
+    if(on && field === 'pq'){ p.skim = true; if(!c.study){ p.study = true; p.studyOn = todayISO(); } }
+    patchOne(id, p);
+    if(on && field === 'pq'){
+      var inp = document.querySelector('.ch[data-id="'+id+'"] .pqscore');
+      if(inp && !inp.value) inp.focus();
+    }
+  }
+
+  var main = document.getElementById('topics');
+  main.addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-act]');
+    if(!btn) return;
+    var row = btn.closest('.ch'), id = row.dataset.id;
+    if(btn.dataset.act === 'toggle') toggle(id, btn.dataset.field);
+    else if(btn.dataset.act === 'note'){ row.classList.add('show-note'); row.querySelector('.note').focus(); }
+  });
+  main.addEventListener('change', function(e){
+    var el = e.target, row = el.closest('.ch');
+    if(el.classList.contains('date')) patchOne(row.dataset.id, {date: el.value});
+    else if(el.classList.contains('pqscore')){
+      var v = el.value === '' ? '' : String(Math.max(0, Math.min(100, Math.round(+el.value))));
+      var c = state.items[row.dataset.id], p = {pqScore: v};
+      if(v !== '' && !isRev(c) && !c.pq){ p.pq = true; p.pqOn = todayISO(); p.skim = true; if(!c.study){ p.study = true; p.studyOn = todayISO(); } }
+      if(v !== '' && isRev(c) && !c.done){ p.done = true; p.doneOn = todayISO(); }
+      patchOne(row.dataset.id, p);
+    } else if(el.classList.contains('ttscore')){
+      var tt = {}; tt[el.dataset.topic] = el.value === '' ? null : Math.max(0, Math.min(100, Math.round(+el.value)));
+      write({}, {tt: tt});
+    }
+  });
+  main.addEventListener('keydown', function(e){
+    if(e.target.isContentEditable && e.key === 'Enter' && !(e.target.dataset.field === 'note' && e.shiftKey)){ e.preventDefault(); e.target.blur(); }
+    if(e.target.tagName === 'INPUT' && e.key === 'Enter') e.target.blur();
+  });
+  main.addEventListener('focusout', function(e){
+    var el = e.target;
+    if(el.isContentEditable){
+      var id = el.closest('.ch').dataset.id, field = el.dataset.field, val = (field === 'note' ? el.innerText : el.textContent).trim();
+      if(state.items[id][field] !== val){ var p = {}; p[field] = val; patchOne(id, p); return; }
+    }
+    setTimeout(function(){ if(!main.contains(document.activeElement) || document.activeElement === document.body) render(); }, 0);
+  });
+  main.addEventListener('toggle', function(e){
+    if(filter !== 'all' || !e.target.matches('details.topic')) return;
+    openTopics = Array.prototype.map.call(main.querySelectorAll('details.topic[open]'), function(d){ return d.dataset.topic; });
+    try { localStorage.setItem('aleen-cfa-2027-open', JSON.stringify(openTopics)); } catch(err){}
+  }, true);
+
+  document.getElementById('today').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-go]'); if(!b) return;
+    var id = b.dataset.id, go = b.dataset.go;
+    if(go === 'recall'){
+      var c = state.items[id];
+      patchOne(id, c.recall1On ? {recall2On: todayISO()} : {recall1On: todayISO()});
+    } else if(!state.items[id][go]) toggle(id, go);
+  });
+
+  document.getElementById('filter').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    filter = b.dataset.f;
+    this.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+    render();
+  });
+  document.getElementById('examdate').addEventListener('change', function(){ if(this.value) write({}, {exam: this.value}); });
+  document.getElementById('bufferdays').addEventListener('change', function(){
+    write({}, {buffer: Math.max(0, Math.min(90, parseInt(this.value, 10) || 0))});
+  });
+
+  var replanBtn = document.getElementById('replan');
+  function resetReplan(){ pendingReplan = false; replanBtn.textContent = 'Re-plan remaining'; replanBtn.classList.remove('confirm'); }
+  replanBtn.addEventListener('click', function(){
+    if(!pendingReplan){
+      pendingReplan = true;
+      replanBtn.textContent = 'Move dates of all unstudied modules?';
+      replanBtn.classList.add('confirm');
+      setTimeout(function(){ if(pendingReplan) resetReplan(); }, 4000);
+      return;
+    }
+    resetReplan();
+    var dates = plan(list(), state.settings, todayISO()), patch = {};
+    Object.keys(dates).forEach(function(id){ patch[id] = {date: dates[id]}; });
+    write(patch);
+  });
+
+  // Keeps "today" correct if the tab stays open past midnight.
+  setInterval(function(){ var a = document.activeElement; if(!a || a === document.body) render(); }, 60000);
+
+  // ---------- backup / restore ----------
+  document.getElementById('backup').addEventListener('click', function(){
+    var blob = new Blob([JSON.stringify({items: state.items, settings: state.settings}, null, 1)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'aleen-cfa-backup-' + todayISO() + '.json';
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  });
+  var restoreFile = document.getElementById('restorefile');
+  document.getElementById('restore').addEventListener('click', function(){ restoreFile.click(); });
+  restoreFile.addEventListener('change', function(){
+    var f = restoreFile.files[0]; if(!f) return;
+    f.text().then(function(txt){
+      var data = JSON.parse(txt);
+      if(!data.items || !Object.keys(data.items).length) throw new Error('empty');
+      if(!confirm('Replace everything here with the backup from ' + f.name + '?')) return;
+      Object.keys(state.items).forEach(function(id){ if(!data.items[id]) delete state.items[id]; });
+      var patches = {};
+      Object.keys(data.items).forEach(function(id){ state.items[id] = state.items[id] || {}; patches[id] = data.items[id]; });
+      write(patches, data.settings || {});
+    }).catch(function(){ alert('That file is not a tracker backup.'); })
+      .then(function(){ restoreFile.value = ''; });
+  });
+
+  if(FIREBASE_CONFIG && window.firebase){
+    startCloud();
+    setTimeout(function(){ if(state.mode === 'connecting') startLocal('offline'); }, 8000);
+  } else {
+    startLocal('');
+  }
+})();
+</script>
+</body>
+</html>

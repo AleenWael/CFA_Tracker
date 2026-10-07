@@ -378,7 +378,7 @@ details.method a{color:var(--accent);}
     ['2026-09-06', [['qm',[5,6]]]],
     ['2026-09-13', [['qm',[7,8]]]],
     ['2026-09-20', [['qm',[9]]]],
-    ['2026-09-27', [['qm',[10,11]],['pc',[1,2]]]],
+    ['2026-09-27', [['qm',[10,11]]]],
     ['2026-10-04', [['fsa',[1,2,3]]]],
     ['2026-10-11', [['fsa',[4,5,6]]]],
     ['2026-10-18', [['fsa',[7,8,9]]]],
@@ -391,7 +391,7 @@ details.method a{color:var(--accent);}
     ['2026-12-06', [['fi',[6,7,8,9,10]]]],
     ['2026-12-13', [['fi',[11,12,13,14,15]]]],
     ['2026-12-20', [['fi',[16,17,18,19]]]],
-    ['2026-12-27', [['pc',[3,4,5,6]],['ai',[1,2,3]]]],
+    ['2026-12-27', [['pc',[1,2,3,4,5,6]],['ai',[1,2,3]]]],
     ['2027-01-03', [['ai',[4,5,6,7]],['ec',[1,2,3,4]]]],
     ['2027-01-10', [['ec',[5,6,7,8]],['de',[1,2,3,4]]]],
     ['2027-01-17', [['de',[5,6,7,8,9,10]],['et',[1,2]]]],
@@ -401,7 +401,8 @@ details.method a{color:var(--accent);}
     ['2027-02-14', [['rev',[4,5,6,7]]]],
     ['2027-02-21', [['rev',[8,9]]]]
   ];
-  var FIXED_DATES = {'rev-1':'2027-02-06', 'rev-2':'2027-02-07', 'rev-3':'2027-02-09', 'rev-4':'2027-02-14', 'rev-5':'2027-02-15',
+  var FIXED_DATES = {'fsa-1':'2026-10-07', 'fsa-2':'2026-10-08', 'fsa-3':'2026-10-10',
+    'rev-1':'2027-02-06', 'rev-2':'2027-02-07', 'rev-3':'2027-02-09', 'rev-4':'2027-02-14', 'rev-5':'2027-02-15',
     'rev-6':'2027-02-19', 'rev-7':'2027-02-20', 'rev-8':'2027-02-21', 'rev-9':'2027-02-21'};
   function weekPlanDates(){
     var out = {};
@@ -435,12 +436,14 @@ details.method a{color:var(--accent);}
   function complete(c){ return isRev(c) ? !!c.done : !!(c.study && c.pq); }
 
   // ---------- seed ----------
+  // Quant is already finished, so it starts ticked off.
+  var DONE_TOPIC = 'qm';
   function seedDocs(){
     var docs = {}, order = 0;
     TOPICS.forEach(function(t){
       t.mods.forEach(function(title, i){
         var n = i + 1, id = t.key + '-' + n;
-        var before = false;
+        var before = t.key === DONE_TOPIC;
         docs[id] = {
           topic: t.key, num: n, title: title, order: (order += 10), date: '',
           skim: before, study: before, pq: before, pqScore: '', review: false, done: false,
@@ -518,6 +521,25 @@ details.method a{color:var(--accent);}
     return missing;
   }
 
+  // Brings progress saved by an older version of the plan up to date:
+  // Quant marked done, PC 1–2 moved to the PC week, FSA starting 7 Oct.
+  // Only touches modules not yet studied. Returns the changed fields per id.
+  var PLAN_VERSION = 2;
+  function migrate(items, settings){
+    var patches = {};
+    if((settings.planv || 1) >= PLAN_VERSION) return patches;
+    var fixed = weekPlanDates();
+    Object.keys(items).forEach(function(id){
+      var c = items[id], p = null;
+      if(c.study) return;
+      if(c.topic === DONE_TOPIC) p = {skim: true, study: true, pq: true, date: ''};
+      else if(['pc-1','pc-2','fsa-1','fsa-2','fsa-3'].indexOf(id) !== -1 && fixed[id] && c.date !== fixed[id]) p = {date: fixed[id]};
+      if(p){ Object.assign(c, p); patches[id] = p; }
+    });
+    settings.planv = PLAN_VERSION;
+    return patches;
+  }
+
   function startLocal(reason){
     state.mode = 'local';
     var saved = lsLoad();
@@ -526,6 +548,7 @@ details.method a{color:var(--accent);}
       state.settings = Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), saved.settings);
     }
     Object.assign(state.items, seedMissing(state.items, state.settings));
+    migrate(state.items, state.settings);
     lsSave();
     if(reason){
       var b = document.getElementById('rulebanner');
@@ -555,15 +578,19 @@ details.method a{color:var(--accent);}
         document.getElementById('rulebanner').classList.add('hidden');
         var saved = lsLoad(), batch = db.batch(), writes = 0;
         if(!Object.keys(items).length && saved && saved.items && Object.keys(saved.items).length){
-          // Carry over anything saved locally before the Firestore rule existed.
+          // Carry over anything saved in this browser before cloud sync was set up.
+          saved.settings = Object.assign({}, settings, saved.settings);
+          migrate(saved.items, saved.settings);
           Object.keys(saved.items).forEach(function(id){ batch.set(col.doc(id), saved.items[id]); writes++; });
-          batch.set(col.doc('_settings'), Object.assign({}, settings, saved.settings));
+          batch.set(col.doc('_settings'), saved.settings);
           batch.commit();
           return;
         }
         var missing = seedMissing(items, settings);
-        Object.keys(missing).forEach(function(id){ batch.set(col.doc(id), missing[id]); writes++; });
-        if(!hasSettings){ batch.set(col.doc('_settings'), settings); writes++; }
+        Object.keys(missing).forEach(function(id){ batch.set(col.doc(id), missing[id]); writes++; items[id] = missing[id]; });
+        var fixes = migrate(items, settings);
+        Object.keys(fixes).forEach(function(id){ if(missing[id]) batch.set(col.doc(id), missing[id]); else batch.set(col.doc(id), fixes[id], {merge:true}); writes++; });
+        if(!hasSettings || writes){ batch.set(col.doc('_settings'), settings, {merge:true}); writes++; }
         if(writes){ batch.commit(); return; }
       }
       state.items = items;

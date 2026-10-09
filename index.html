@@ -321,34 +321,21 @@ details.method a{color:var(--accent);}
 
   // ---------- curriculum ----------
   // The 10 Level I topics and their 102 learning modules for the 2027 exam,
-  // listed in study order. `mid` is the midpoint of the 2027 exam-weight range,
+  // listed in study order (Quant is already done, so it sits at the end). `mid` is the midpoint of the 2027 exam-weight range,
   // used for readiness. `w` scales study time per module (heavier topics get more).
   var TOPICS = [
-    {key:'qm',  code:'QM',  name:'Quantitative Methods', weight:'11–14%', mid:12.5, color:'#2F5FA8', w:1.1, mods:[
-      'Returns of Financial Assets and Instruments','Types of Financial Returns','Benchmarking Returns',
-      'The Time Value of Money in Finance','Statistical Characteristics of Asset Returns',
-      'Statistical Distributions for Financial Asset Prices and Returns','Estimation and Hypothesis Testing',
-      'The Return and Risk of a Financial Portfolio','Simulation of Financial Asset Prices and Returns',
-      'Applications of Simple Linear Regression in Finance','Introduction to Financial Data Science']},
-    {key:'pc',  code:'PC',  name:'Portfolio Construction', weight:'8–12%', mid:10, color:'#B5574A', w:1.1, mods:[
-      'Portfolio Risk and Return: Part I','Portfolio Risk and Return: Part II','Portfolio Management: An Overview',
-      'Basics of Portfolio Planning and Construction','The Behavioral Biases of Individuals','Introduction to Risk Management']},
     {key:'fsa', code:'FSA', name:'Financial Statement Analysis', weight:'11–14%', mid:12.5, color:'#B5485E', w:1.5, mods:[
       'Introduction to Financial Statement Analysis','Analyzing Income Statements','Analyzing Balance Sheets',
       'Analyzing Statements of Cash Flows I','Analyzing Statements of Cash Flows II','Analysis of Inventories',
       'Analysis of Long-Term Assets','Topics in Long-Term Liabilities and Equity','Analysis of Income Taxes',
       'Financial Reporting Quality','Financial Analysis Techniques','Introduction to Financial Statement Modeling']},
-    {key:'cf',  code:'CF',  name:'Corporate Finance', weight:'6–9%', mid:7.5, color:'#9C7526', w:0.9, mods:[
-      'Organizational Forms, Issuer Features, and Ownership','Investors and Other Stakeholders',
-      'Corporate Governance: Conflicts, Mechanisms, Risks, Benefits','Working Capital and Liquidity',
-      'Capital Investments and Capital Allocation','Capital Structure','Business Models']},
-    {key:'eq',  code:'EQ',  name:'Equities', weight:'11–14%', mid:12.5, color:'#2E7D53', w:1.1, mods:[
+    {key:'eq',  code:'EQ',  name:'Equities', weight:'11–14%', mid:12.5, color:'#2E7D53', w:1, mods:[
       'Equity Instrument Features','Equity Jurisdictions, Classes, and the Voting Process','Equity Issuance and Trading',
       'Sources of Equity Returns','Introduction to Equity Valuation','Discounted Cash Flow (DCF) and Growth Models',
       'Relative Value Equity Valuation Approaches','Financial Statement Forecasting in Equity Valuation',
       'Industry and Competitive Analysis','Company Analysis: Past, Present, and Future','Equity Analyst Research Reports',
       'CAPM, Market Model, and Other Factor-Based Equity Models']},
-    {key:'fi',  code:'FI',  name:'Fixed Income', weight:'11–14%', mid:12.5, color:'#2A7E89', w:0.9, mods:[
+    {key:'fi',  code:'FI',  name:'Fixed Income', weight:'11–14%', mid:12.5, color:'#2A7E89', w:1.25, mods:[
       'Fixed-Income Instrument Features','Fixed-Income Cash Flows and Types','Fixed-Income Issuance and Trading',
       'Fixed-Income Markets for Corporate Issuers','Fixed-Income Markets for Government Issuers',
       'Bond Valuation: Prices and Yields','Yield and Yield Spread Measures for Fixed-Rate Bonds',
@@ -357,77 +344,53 @@ details.method a{color:var(--accent);}
       'Yield-Based Bond Convexity and Portfolio Properties','Curve-Based and Empirical Risk Measures','Credit Risk',
       'Credit Analysis for Government Issuers','Credit Analysis for Corporate Issuers','Fixed-Income Securitization',
       'Asset-Backed Security (ABS) Features','Mortgage-Backed Security (MBS) Features']},
-    {key:'ai',  code:'AI',  name:'Alternative Investments', weight:'6–9%', mid:7.5, color:'#6273C4', w:1, mods:[
-      'Alternative Investment Features, Methods, Structures','Alternative Investment Performance and Returns',
-      'Investments in Private Capital: Equity and Debt','Real Estate and Infrastructure','Natural Resources',
-      'Hedge Funds','Introduction to Digital Assets']},
-    {key:'ec',  code:'EC',  name:'Economics', weight:'6–9%', mid:7.5, color:'#7557B5', w:1, mods:[
-      'The Firm and Market Structures','Understanding Business Cycles','Fiscal Policy','Monetary Policy',
-      'Introduction to Geopolitics','International Trade','Capital Flows and the FX Market','Exchange Rate Calculations']},
-    {key:'de',  code:'DE',  name:'Derivatives & Risk Mgmt', weight:'6–9%', mid:7.5, color:'#5B7392', w:0.9, mods:[
-      'Derivative Instrument and Market Features','Forward Commitment and Contingent Claim Features',
-      'Derivative Benefits, Risks, Issuer and Investor Uses','Arbitrage, Replication, and the Cost of Carry',
-      'Pricing and Valuation of Forward Contracts','Pricing and Valuation of Futures Contracts',
-      'Pricing and Valuation of Interest Rate and Other Swaps','Pricing and Valuation of Options',
-      'Option Replication Using Put–Call Parity','Valuing a Derivative Using a One-Period Binomial Model']},
     {key:'et',  code:'ET',  name:'Ethics', weight:'10–15%', mid:12.5, color:'#95509F', w:1.2, mods:[
       'Ethics and Trust in the Investment Profession','Code of Ethics and Standards of Professional Conduct',
       'Standard I: Professionalism','Standard II: Integrity of Capital Markets','Standard III: Duties to Clients',
       'Standard IV: Duties to Employers','Standard V: Investment Analysis, Recommendations, and Actions',
       'Standard VI: Conflicts of Interest','Standard VII: Responsibilities as Member or Candidate',
       'Application of the Code and Standards: Level I']},
+    {key:'cf',  code:'CF',  name:'Corporate Finance', weight:'6–9%', mid:7.5, color:'#9C7526', w:0.8, mods:[
+      'Organizational Forms, Issuer Features, and Ownership','Investors and Other Stakeholders',
+      'Corporate Governance: Conflicts, Mechanisms, Risks, Benefits','Working Capital and Liquidity',
+      'Capital Investments and Capital Allocation','Capital Structure','Business Models']},
+    {key:'pc',  code:'PC',  name:'Portfolio Construction', weight:'8–12%', mid:10, color:'#B5574A', w:1, mods:[
+      'Portfolio Risk and Return: Part I','Portfolio Risk and Return: Part II','Portfolio Management: An Overview',
+      'Basics of Portfolio Planning and Construction','The Behavioral Biases of Individuals','Introduction to Risk Management']},
+    {key:'de',  code:'DE',  name:'Derivatives & Risk Mgmt', weight:'6–9%', mid:7.5, color:'#5B7392', w:1.1, mods:[
+      'Derivative Instrument and Market Features','Forward Commitment and Contingent Claim Features',
+      'Derivative Benefits, Risks, Issuer and Investor Uses','Arbitrage, Replication, and the Cost of Carry',
+      'Pricing and Valuation of Forward Contracts','Pricing and Valuation of Futures Contracts',
+      'Pricing and Valuation of Interest Rate and Other Swaps','Pricing and Valuation of Options',
+      'Option Replication Using Put–Call Parity','Valuing a Derivative Using a One-Period Binomial Model']},
+    {key:'ai',  code:'AI',  name:'Alternative Investments', weight:'6–9%', mid:7.5, color:'#6273C4', w:0.75, mods:[
+      'Alternative Investment Features, Methods, Structures','Alternative Investment Performance and Returns',
+      'Investments in Private Capital: Equity and Debt','Real Estate and Infrastructure','Natural Resources',
+      'Hedge Funds','Introduction to Digital Assets']},
+    {key:'ec',  code:'EC',  name:'Economics', weight:'6–9%', mid:7.5, color:'#7557B5', w:0.8, mods:[
+      'The Firm and Market Structures','Understanding Business Cycles','Fiscal Policy','Monetary Policy',
+      'Introduction to Geopolitics','International Trade','Capital Flows and the FX Market','Exchange Rate Calculations']},
+    {key:'qm',  code:'QM',  name:'Quantitative Methods', weight:'11–14%', mid:12.5, color:'#2F5FA8', w:1.1, mods:[
+      'Returns of Financial Assets and Instruments','Types of Financial Returns','Benchmarking Returns',
+      'The Time Value of Money in Finance','Statistical Characteristics of Asset Returns',
+      'Statistical Distributions for Financial Asset Prices and Returns','Estimation and Hypothesis Testing',
+      'The Return and Risk of a Financial Portfolio','Simulation of Financial Asset Prices and Returns',
+      'Applications of Simple Linear Regression in Finance','Introduction to Financial Data Science']},
     {key:'rev', code:'FINAL', name:'Final Review & Mock Exams', weight:'', mid:0, color:'#555B63', w:1, review:true, mods:[
-      'Mock exam 1: full, timed','Mock 1 debrief: redo every wrong question, log weak modules',
-      'Repair week: your two weakest topics','Mock exam 2: full, timed','Mock 2 debrief + repair weak modules',
-      'Mock exam 3: full, timed','Mock 3 debrief + formula sheet','Ethics: re-read Standards I–VII + practice questions',
-      'Taper: light review, rest, exam-day logistics']}
+      'Review: FSA + Ethics (highest weight, weakest modules first)','Review: Equities + Fixed Income',
+      'Review: Quant, Corporate, Portfolio, Derivatives, Alts, Econ + formula sheet',
+      'Mock exam 1: full, timed','Mock 1 debrief: redo every wrong question, repair weakest topics',
+      'Mock exam 2: full, timed','Mock 2 debrief + repair weak modules',
+      'Mock exam 3: full, timed','Mock 3 debrief, Ethics re-read, light review and taper']}
   ];
   var HEAVY = {'qm-4':1.2, 'fsa-4':1.4, 'fsa-5':1.4, 'fsa-9':1.3, 'fi-9':1.3, 'fi-11':1.3, 'eq-6':1.2, 'et-2':1.3, 'et-10':1.3};
-  var DEFAULT_SETTINGS = {exam:'2027-02-22', buffer:22, tt:{}};
+  var DEFAULT_SETTINGS = {exam:'2027-02-22', buffer:52, tt:{}};
   var GOOD = 70, OK = 60;
 
-  // Starting schedule: the week-by-week study plan (week starts Sunday).
-  // Each week's modules are spread across its days; Re-plan remaining overrides this.
-  var WEEK_PLAN = [
-    ['2026-08-30', [['qm',[1,2,3,4]]]],
-    ['2026-09-06', [['qm',[5,6]]]],
-    ['2026-09-13', [['qm',[7,8]]]],
-    ['2026-09-20', [['qm',[9]]]],
-    ['2026-09-27', [['qm',[10,11]]]],
-    ['2026-10-04', [['fsa',[1,2,3]]]],
-    ['2026-10-11', [['fsa',[4,5,6]]]],
-    ['2026-10-18', [['fsa',[7,8,9]]]],
-    ['2026-10-25', [['fsa',[10,11,12]]]],
-    ['2026-11-01', [['cf',[1,2,3,4,5,6,7]]]],
-    ['2026-11-08', [['eq',[1,2,3,4]]]],
-    ['2026-11-15', [['eq',[5,6,7,8]]]],
-    ['2026-11-22', [['eq',[9,10,11,12]]]],
-    ['2026-11-29', [['fi',[1,2,3,4,5]]]],
-    ['2026-12-06', [['fi',[6,7,8,9,10]]]],
-    ['2026-12-13', [['fi',[11,12,13,14,15]]]],
-    ['2026-12-20', [['fi',[16,17,18,19]]]],
-    ['2026-12-27', [['pc',[1,2,3,4,5,6]],['ai',[1,2,3]]]],
-    ['2027-01-03', [['ai',[4,5,6,7]],['ec',[1,2,3,4]]]],
-    ['2027-01-10', [['ec',[5,6,7,8]],['de',[1,2,3,4]]]],
-    ['2027-01-17', [['de',[5,6,7,8,9,10]],['et',[1,2]]]],
-    ['2027-01-24', [['et',[3,4,5,6,7]]]],
-    ['2027-01-31', [['et',[8,9,10]],['rev',[1]]]],
-    ['2027-02-07', [['rev',[2,3]]]],
-    ['2027-02-14', [['rev',[4,5,6,7]]]],
-    ['2027-02-21', [['rev',[8,9]]]]
-  ];
-  var FIXED_DATES = {'fsa-1':'2026-10-07', 'fsa-2':'2026-10-08', 'fsa-3':'2026-10-10',
-    'rev-1':'2027-02-06', 'rev-2':'2027-02-07', 'rev-3':'2027-02-09', 'rev-4':'2027-02-14', 'rev-5':'2027-02-15',
-    'rev-6':'2027-02-19', 'rev-7':'2027-02-20', 'rev-8':'2027-02-21', 'rev-9':'2027-02-21'};
-  function weekPlanDates(){
-    var out = {};
-    WEEK_PLAN.forEach(function(wk){
-      var ids = [];
-      wk[1].forEach(function(g){ g[1].forEach(function(n){ ids.push(g[0] + '-' + n); }); });
-      ids.forEach(function(id, j){ out[id] = FIXED_DATES[id] || addDays(wk[0], Math.floor(j * 7 / ids.length)); });
-    });
-    return out;
-  }
+  // Content runs from today to 31 Dec (exam − 52 review days); the review
+  // and mock items have fixed days in January and February.
+  var FIXED_DATES = {'rev-1':'2027-01-01', 'rev-2':'2027-01-08', 'rev-3':'2027-01-15', 'rev-4':'2027-01-23',
+    'rev-5':'2027-01-24', 'rev-6':'2027-02-06', 'rev-7':'2027-02-07', 'rev-8':'2027-02-13', 'rev-9':'2027-02-15'};
 
   var topicByKey = {};
   TOPICS.forEach(function(t){ topicByKey[t.key] = t; });
@@ -460,14 +423,19 @@ details.method a{color:var(--accent);}
   // ---------- seed ----------
   // Quant is already finished, so it starts ticked off.
   var DONE_TOPIC = 'qm';
+  // Sort position of a module: follows the TOPICS study order.
+  function orderOf(key, n){
+    for(var i = 0; i < TOPICS.length; i++) if(TOPICS[i].key === key) return (i + 1) * 1000 + n * 10;
+    return 99000 + n;
+  }
   function seedDocs(){
-    var docs = {}, order = 0;
+    var docs = {};
     TOPICS.forEach(function(t){
       t.mods.forEach(function(title, i){
         var n = i + 1, id = t.key + '-' + n;
         var before = t.key === DONE_TOPIC;
         docs[id] = {
-          topic: t.key, num: n, title: title, order: (order += 10), date: '',
+          topic: t.key, num: n, title: title, order: orderOf(t.key, n), date: '',
           skim: before, study: before, pq: before, pqScore: '', review: false, done: false,
           studyOn: '', pqOn: '', reviewOn: '', recall1On: '', recall2On: '',
           parts: before ? allParts(id) : {},
@@ -496,7 +464,8 @@ details.method a{color:var(--accent);}
     });
     var rSpan = Math.max(1, daysBetween(contentEnd, exam));
     review.forEach(function(c, i){
-      out[c.id] = addDays(contentEnd, Math.min(rSpan-1, Math.floor(i * rSpan / review.length)));
+      var fixed = FIXED_DATES[c.id];
+      out[c.id] = fixed && fixed >= contentEnd && fixed < exam ? fixed : addDays(contentEnd, Math.min(rSpan-1, Math.floor(i * rSpan / review.length)));
     });
     return out;
   }
@@ -539,32 +508,41 @@ details.method a{color:var(--accent);}
     Object.keys(seeds).forEach(function(id){ if(!existing[id]) missing[id] = seeds[id]; });
     var newOnes = Object.keys(missing).map(function(id){ return Object.assign({id:id}, missing[id]); })
       .sort(function(a,b){ return a.order - b.order; });
-    var dates = plan(newOnes, settings, todayISO()), fixed = weekPlanDates();
-    Object.keys(missing).forEach(function(id){ missing[id].date = fixed[id] || dates[id] || ''; });
+    var dates = plan(newOnes, settings, todayISO());
+    Object.keys(missing).forEach(function(id){ missing[id].date = dates[id] || ''; });
     return missing;
   }
 
-  // Brings progress saved by an older version of the plan up to date:
-  // Quant marked done, PC 1–2 moved to the PC week, FSA starting 7 Oct.
-  // Only touches modules not yet studied. Returns the changed fields per id.
-  var PLAN_VERSION = 3;
+  // Brings progress saved by an older version of the plan up to date. Returns
+  // the changed fields per id. Studied modules keep their dates and scores.
+  //  v2: Quant marked done.  v3: studied modules get all components ticked.
+  //  v4: new topic order (FSA, EQ, FI, ET, CF, PC, DE, AI, EC), content
+  //      finishing 31 Dec, review and mocks from 1 Jan.
+  var PLAN_VERSION = 4;
   function migrate(items, settings){
     var patches = {};
     var from = settings.planv || 1;
     if(from >= PLAN_VERSION) return patches;
-    var fixed = weekPlanDates();
+    function t0(k){ return topicByKey[k]; }
+    function set(id, p){ Object.assign(items[id], p); patches[id] = Object.assign(patches[id] || {}, p); }
     Object.keys(items).forEach(function(id){
-      var c = items[id], p = null;
-      // v3: modules already studied get all their components ticked.
-      if(c.study){
-        if(!c.parts || !Object.keys(c.parts).length){ p = {parts: allParts(id)}; Object.assign(c, p); patches[id] = p; }
-        return;
-      }
-      if(from >= 2) return;
-      if(c.topic === DONE_TOPIC) p = {skim: true, study: true, pq: true, date: '', parts: allParts(id)};
-      else if(['pc-1','pc-2','fsa-1','fsa-2','fsa-3'].indexOf(id) !== -1 && fixed[id] && c.date !== fixed[id]) p = {date: fixed[id]};
-      if(p){ Object.assign(c, p); patches[id] = p; }
+      var c = items[id];
+      if(from < 2 && c.topic === DONE_TOPIC && !c.study) set(id, {skim: true, study: true, pq: true, date: '', parts: allParts(id)});
+      if(c.study && (!c.parts || !Object.keys(c.parts).length)) set(id, {parts: allParts(id)});
+      var o = orderOf(c.topic, c.num);
+      if(c.order !== o) set(id, {order: o});
+      var w = t0(c.topic) ? (HEAVY[id] || 1) * t0(c.topic).w : null;
+      if(w != null && c.weight !== w) set(id, {weight: w});
+      var t = topicByKey[c.topic];
+      if(from < 4 && t && t.review && !c.done && t.mods[c.num - 1] && c.title !== t.mods[c.num - 1]) set(id, {title: t.mods[c.num - 1]});
     });
+    if(from < 4){
+      settings.buffer = DEFAULT_SETTINGS.buffer;
+      var list = Object.keys(items).map(function(id){ return Object.assign({id: id}, items[id]); })
+        .sort(function(a, b){ return a.order - b.order; });
+      var dates = plan(list, settings, todayISO());
+      Object.keys(dates).forEach(function(id){ if(items[id].date !== dates[id]) set(id, {date: dates[id]}); });
+    }
     settings.planv = PLAN_VERSION;
     return patches;
   }

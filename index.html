@@ -471,10 +471,18 @@ details.method a{color:var(--accent);}
   }
 
   // ---------- storage ----------
-  // To sync across devices, paste a Firebase web config here (Firestore,
-  // collection below). Left as null, progress is saved in this browser only;
-  // use Backup / Restore to move it between devices.
-  var FIREBASE_CONFIG = null;
+  // Progress syncs across devices through Aleen's Firebase project (Firestore,
+  // collection below). Set this to null to save in this browser only.
+  // A Firebase web config is not a secret: access is controlled by the
+  // Firestore rules, which only open the collection below.
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCgogkes28WealR-DbEe07l3ZWWidDUnS8",
+    authDomain: "cfa-tracker-fbb69.firebaseapp.com",
+    projectId: "cfa-tracker-fbb69",
+    storageBucket: "cfa-tracker-fbb69.firebasestorage.app",
+    messagingSenderId: "1046853930723",
+    appId: "1:1046853930723:web:7af6ae68383f4b594ebfd6"
+  };
   var COLLECTION = 'cfa2027';
 
   var LS_KEY = 'aleen-cfa-2027-v1';

@@ -4,5 +4,6 @@ Level I study tracker for the **February 2027** exam. It has 10 topics, 102 lear
 
 Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → Deploy from branch → `main` / root).
 
-- Progress is saved in your browser. Use **Backup** / **Restore** to move it between devices.
-- To sync across devices, paste a Firebase web config into `FIREBASE_CONFIG` in `index.html`. Progress is then stored in the Firestore collection `cfa2027`.
+- Progress syncs across devices through Firebase (Firestore collection `cfa2027`, project `cfa-tracker-fbb69`). If the database can't be reached, the site falls back to saving in the browser.
+- **Backup** / **Restore** download and load a copy of all progress.
+- Module components (sub-topics) live in `components.js`.

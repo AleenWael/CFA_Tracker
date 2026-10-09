@@ -157,6 +157,17 @@ details.method a{color:var(--accent);}
 .ch .pqscore.good{background:var(--good-tint);color:var(--good);border-color:transparent;}
 .ch .pqscore.warn{background:var(--warn-tint);color:var(--warn);border-color:transparent;}
 .ch .pqscore.bad{background:var(--late-tint);color:var(--late);border-color:transparent;}
+.ch .parts{grid-column:2/-1;margin:2px 0 0 -4px;}
+.ch .partsbtn{border:0;background:none;cursor:pointer;padding:2px 4px;font:inherit;font-size:12px;color:var(--muted);border-radius:4px;display:inline-flex;gap:6px;align-items:center;}
+.ch .partsbtn:hover{color:var(--tc);}
+.ch .partsbtn .pbar{display:inline-block;width:46px;height:4px;border-radius:2px;background:var(--bar);overflow:hidden;}
+.ch .partsbtn .pbar i{display:block;height:100%;background:var(--tc);}
+.ch .partlist{list-style:none;margin:4px 0 4px;padding:0 0 0 4px;display:flex;flex-direction:column;gap:3px;}
+.ch .partlist li{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.35;}
+.ch .partlist li.on span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint);}
+.ch .partlist .pcb{flex:none;width:18px;height:18px;border-radius:5px;border:2px solid var(--line-strong);background:transparent;cursor:pointer;padding:0;color:#fff;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;}
+.ch .partlist .pcb:hover{border-color:var(--tc);}
+.ch .partlist li.on .pcb{background:var(--tc);border-color:var(--tc);}
 .ch .meta{grid-column:2/-1;font-size:11.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;}
 .ch .meta .ok{color:var(--good);}
 .ch .meta:empty{display:none;}
@@ -224,6 +235,9 @@ details.method a{color:var(--accent);}
   .ch .cb .lbl{display:inline;}
   .ch .pqscore{order:5;flex:0 0 58px;height:38px;font-size:16px;border-radius:9px;}
   .ch > span:empty{display:none;}
+  .ch .parts{order:6;flex:1 0 100%;}
+  .ch .partlist li{font-size:15px;gap:10px;padding:3px 0;}
+  .ch .partlist .pcb{width:24px;height:24px;border-radius:7px;font-size:13px;}
   .ch .note{order:6;flex:1 0 100%;font-size:16px;margin:2px 0 0 -4px;}
   .ch .meta{order:7;flex:1 0 100%;}
   .topicfoot{padding:12px;}
@@ -257,7 +271,7 @@ details.method a{color:var(--accent);}
       the heavy topics, practice questions straight after each module, and a final phase of full mock exams.
       <ol>
         <li><b>Skim.</b> Before a module, read the Learning Outcome Statements and the summary so you know what you'll be tested on.</li>
-        <li><b>Study.</b> Read the module properly and work through the examples. The schedule is built around this step.</li>
+        <li><b>Study.</b> Watch the video, read the summary and work through the examples. Open <b>Components</b> under a module to tick off its sub-topics one by one: ticking the last one marks the module studied.</li>
         <li><b>Practice Qs.</b> Do the end-of-module or question-bank questions the same day or the next, and enter your score.
           <span class="score good">70%+</span> is on track, <span class="score warn">60–69</span> needs a second look, and
           <span class="score bad">&lt;60</span> is a weak area that gets priority in final review.</li>
@@ -300,6 +314,7 @@ details.method a{color:var(--accent);}
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="components.js"></script>
 <script>
 (function(){
   "use strict";
@@ -416,6 +431,13 @@ details.method a{color:var(--accent);}
 
   var topicByKey = {};
   TOPICS.forEach(function(t){ topicByKey[t.key] = t; });
+  var COMPONENTS = window.CFA_COMPONENTS || {};
+  function partsOf(id){ return COMPONENTS[id] || []; }
+  function allParts(id){ var o = {}; partsOf(id).forEach(function(_, i){ o[i] = true; }); return o; }
+  function partsDone(c){ var p = c.parts || {}; return partsOf(c.id).filter(function(_, i){ return p[i]; }).length; }
+  var openParts = {};
+  try { openParts = JSON.parse(localStorage.getItem('aleen-cfa-2027-parts-open') || '{}') || {}; } catch(e){}
+  function saveOpenParts(){ try { localStorage.setItem('aleen-cfa-2027-parts-open', JSON.stringify(openParts)); } catch(e){} }
   function isRev(c){ return topicByKey[c.topic] && topicByKey[c.topic].review; }
   function isMock(c){ return isRev(c) && /^Mock exam/i.test(c.title); }
 
@@ -448,6 +470,7 @@ details.method a{color:var(--accent);}
           topic: t.key, num: n, title: title, order: (order += 10), date: '',
           skim: before, study: before, pq: before, pqScore: '', review: false, done: false,
           studyOn: '', pqOn: '', reviewOn: '', recall1On: '', recall2On: '',
+          parts: before ? allParts(id) : {},
           note: '', weight: (HEAVY[id] || 1) * t.w
         };
       });
@@ -524,15 +547,21 @@ details.method a{color:var(--accent);}
   // Brings progress saved by an older version of the plan up to date:
   // Quant marked done, PC 1–2 moved to the PC week, FSA starting 7 Oct.
   // Only touches modules not yet studied. Returns the changed fields per id.
-  var PLAN_VERSION = 2;
+  var PLAN_VERSION = 3;
   function migrate(items, settings){
     var patches = {};
-    if((settings.planv || 1) >= PLAN_VERSION) return patches;
+    var from = settings.planv || 1;
+    if(from >= PLAN_VERSION) return patches;
     var fixed = weekPlanDates();
     Object.keys(items).forEach(function(id){
       var c = items[id], p = null;
-      if(c.study) return;
-      if(c.topic === DONE_TOPIC) p = {skim: true, study: true, pq: true, date: ''};
+      // v3: modules already studied get all their components ticked.
+      if(c.study){
+        if(!c.parts || !Object.keys(c.parts).length){ p = {parts: allParts(id)}; Object.assign(c, p); patches[id] = p; }
+        return;
+      }
+      if(from >= 2) return;
+      if(c.topic === DONE_TOPIC) p = {skim: true, study: true, pq: true, date: '', parts: allParts(id)};
       else if(['pc-1','pc-2','fsa-1','fsa-2','fsa-3'].indexOf(id) !== -1 && fixed[id] && c.date !== fixed[id]) p = {date: fixed[id]};
       if(p){ Object.assign(c, p); patches[id] = p; }
     });
@@ -763,6 +792,20 @@ details.method a{color:var(--accent);}
     return '<button class="cb '+(extra||'')+(on?' on':'')+'" data-act="toggle" data-field="'+field+'" title="'+label+'">'+(on?'✓':'')+'<span class="lbl">'+label+'</span></button>';
   }
 
+  function partsHTML(c){
+    var names = partsOf(c.id);
+    if(!names.length) return '';
+    var p = c.parts || {}, n = partsDone(c), open = !!openParts[c.id];
+    var html = '<div class="parts"><button class="partsbtn" data-act="parts" aria-expanded="'+open+'">' +
+      (open ? '▾' : '▸') + ' Components <b>'+n+'/'+names.length+'</b><span class="pbar"><i style="width:'+(n/names.length*100)+'%"></i></span></button>';
+    if(open){
+      html += '<ul class="partlist">' + names.map(function(name, i){
+        return '<li class="'+(p[i]?'on':'')+'"><button class="pcb" data-act="part" data-i="'+i+'" aria-pressed="'+!!p[i]+'" aria-label="'+esc(name)+'">'+(p[i]?'✓':'')+'</button><span>'+esc(name)+'</span></li>';
+      }).join('') + '</ul>';
+    }
+    return html + '</div>';
+  }
+
   function rowHTML(c, t, today){
     var cls = 'ch';
     if(complete(c)) cls += ' complete';
@@ -789,6 +832,7 @@ details.method a{color:var(--accent);}
       '<input class="date" type="date" required value="'+esc(c.date)+'" title="Scheduled day">' +
       mid +
       '<button class="addnote'+(c.note?' has':'')+'" data-act="note" title="Comments">✎</button>' +
+      partsHTML(c) +
       '<div class="note" contenteditable="true" data-field="note" data-ph="Comments: what was hard, formulas to remember, page refs…">'+esc(c.note)+'</div>' +
       '<div class="meta">'+bits.join('')+'</div>' +
       '</div>';
@@ -801,13 +845,25 @@ details.method a{color:var(--accent);}
     p[field] = on;
     if(ON_FIELD[field]) p[ON_FIELD[field]] = on ? todayISO() : '';
     // Studying implies skimming; doing Qs implies studying.
-    if(on && field === 'study') p.skim = true;
-    if(on && field === 'pq'){ p.skim = true; if(!c.study){ p.study = true; p.studyOn = todayISO(); } }
+    if(on && field === 'study'){ p.skim = true; if(partsOf(id).length) p.parts = allParts(id); }
+    if(on && field === 'pq'){ p.skim = true; if(!c.study){ p.study = true; p.studyOn = todayISO(); if(partsOf(id).length) p.parts = allParts(id); } }
     patchOne(id, p);
     if(on && field === 'pq'){
       var inp = document.querySelector('.ch[data-id="'+id+'"] .pqscore');
       if(inp && !inp.value) inp.focus();
     }
+  }
+
+  // Ticking a component; ticking the last one marks the module studied.
+  function togglePart(id, i){
+    var c = state.items[id], parts = Object.assign({}, c.parts || {});
+    parts[i] = !parts[i];
+    var p = {parts: parts};
+    var all = partsOf(id).every(function(_, k){ return parts[k]; });
+    var any = partsOf(id).some(function(_, k){ return parts[k]; });
+    if(any && !c.skim) p.skim = true;
+    if(all && !c.study){ p.study = true; p.studyOn = todayISO(); }
+    patchOne(id, p);
   }
 
   var main = document.getElementById('topics');
@@ -817,6 +873,11 @@ details.method a{color:var(--accent);}
     var row = btn.closest('.ch'), id = row.dataset.id;
     if(btn.dataset.act === 'toggle') toggle(id, btn.dataset.field);
     else if(btn.dataset.act === 'note'){ row.classList.add('show-note'); row.querySelector('.note').focus(); }
+    else if(btn.dataset.act === 'parts'){
+      if(openParts[id]) delete openParts[id]; else openParts[id] = 1;
+      saveOpenParts(); render();
+    }
+    else if(btn.dataset.act === 'part') togglePart(id, +btn.dataset.i);
   });
   main.addEventListener('change', function(e){
     var el = e.target, row = el.closest('.ch');

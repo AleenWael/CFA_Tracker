@@ -1,0 +1,34 @@
+name: Daily study email
+
+# Runs every hour; the script only sends once a day, at the hour chosen on
+# the website (in your own time zone). "Run workflow" sends one right away.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Send now, even if today's email already went out"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-email
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send today's study email
+        run: python3 scripts/daily_email.py
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}

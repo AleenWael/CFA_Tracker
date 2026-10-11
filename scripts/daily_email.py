@@ -5,10 +5,13 @@ Reads the tracker's progress from Firestore and, once a day at the hour set
 on the website, emails the modules scheduled for that day, anything overdue,
 practice questions still to do and recall checks that are due.
 
+Email goes out through Resend (resend.com), so no access to your own
+mailbox is needed. On Resend's free plan, without a domain of your own, it
+can only send to the address the Resend account was created with.
+
 Environment:
-  GMAIL_USER          Gmail address that sends the email
-  GMAIL_APP_PASSWORD  16-character Google app password for that account
-  EMAIL_TO            where to send it (defaults to GMAIL_USER)
+  RESEND_API_KEY      a Resend API key with sending access
+  EMAIL_TO            your email address (the one you signed up to Resend with)
   FORCE=true          send now, ignoring the hour and "already sent today"
   DRY_RUN=true        print the email instead of sending it
 """
@@ -17,11 +20,10 @@ import datetime as dt
 import json
 import os
 import re
-import smtplib
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
-from email.message import EmailMessage
 from html import escape
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -30,6 +32,8 @@ API_KEY = "AIzaSyCgogkes28WealR-DbEe07l3ZWWidDUnS8"
 PROJECT = "cfa-tracker-fbb69"
 COLLECTION = "cfa2027"
 SITE_URL = "https://aleenwael.github.io/CFA_Tracker/"
+RESEND_URL = os.environ.get("RESEND_URL", "https://api.resend.com/emails")
+SENDER = "CFA Tracker <onboarding@resend.dev>"  # Resend's shared test sender
 BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents/{COLLECTION}"
 
 # key: (code, colour, name) — keep in step with TOPICS in index.html.
@@ -199,11 +203,30 @@ def build(docs, comps, today):
     return subject, "\n".join(text), body_html
 
 
+def send(api_key, to, subject, text, html):
+    body = json.dumps({"from": SENDER, "to": [to], "subject": subject, "text": text, "html": html}).encode()
+    req = urllib.request.Request(RESEND_URL, data=body, method="POST", headers={
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": "cfa-tracker-daily-email/1.0",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", "replace")
+        hint = ""
+        if e.code == 403:
+            hint = " EMAIL_TO must be the same address you signed up to Resend with."
+        elif e.code == 401:
+            hint = " The RESEND_API_KEY secret is missing or wrong."
+        raise RuntimeError(f"Resend refused the email ({e.code}): {detail}.{hint}") from None
+
+
 def main():
     force = os.environ.get("FORCE", "").lower() == "true"
     dry = os.environ.get("DRY_RUN", "").lower() == "true"
-    user, password = os.environ.get("GMAIL_USER", ""), os.environ.get("GMAIL_APP_PASSWORD", "")
-    to = os.environ.get("EMAIL_TO") or user
+    api_key, to = os.environ.get("RESEND_API_KEY", "").strip(), os.environ.get("EMAIL_TO", "").strip()
 
     docs = load_docs()
     settings = docs.get("_settings", {})
@@ -230,17 +253,11 @@ def main():
     if dry:
         print(f"Subject: {subject}\nTo: {to or '(not set)'}\n\n{text}")
         return
-    if not (user and password and to):
-        print("::warning::Email secrets are not set yet (GMAIL_USER, GMAIL_APP_PASSWORD). See the README.")
+    if not (api_key and to):
+        print("::warning::Email secrets are not set yet (RESEND_API_KEY, EMAIL_TO). See the README.")
         return
 
-    msg = EmailMessage()
-    msg["Subject"], msg["From"], msg["To"] = subject, f"CFA Tracker <{user}>", to
-    msg.set_content(text)
-    msg.add_alternative(html, subtype="html")
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as smtp:
-        smtp.login(user, password)
-        smtp.send_message(msg)
+    send(api_key, to, subject, text, html)
     if not force:
         mark_sent(today)
     print(f"Sent: {subject}")

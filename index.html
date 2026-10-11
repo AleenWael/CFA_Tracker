@@ -182,6 +182,40 @@ details.method a{color:var(--accent);}
 .topicfoot{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--tc) 6%,var(--surface));font-size:12.5px;color:var(--muted);}
 .topicfoot input{width:58px;font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;background:var(--surface);color:var(--ink);}
 
+/* calendar */
+.calendar{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.calhead{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);}
+.calhead h2{font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;font-size:19px;margin:0;flex:1;}
+.calnav{font:inherit;font-size:13px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:7px;padding:5px 11px;cursor:pointer;}
+.calnav:hover{border-color:var(--accent);color:var(--accent);}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));}
+.calgrid .dow{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;padding:7px 8px;border-bottom:1px solid var(--line);}
+.day{min-height:96px;min-width:0;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px 6px 6px;display:flex;flex-direction:column;align-items:stretch;gap:3px;cursor:pointer;background:var(--surface);color:inherit;font:inherit;text-align:left;}
+.day:nth-child(7n){border-right:0;}
+.day:hover{background:var(--accent-tint);}
+.day.out{background:var(--paper);}
+.day.out .dn{color:var(--faint);}
+.day.rev{background:color-mix(in srgb,#555B63 6%,var(--surface));}
+.day .dn{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;align-self:flex-start;padding:0 5px;border-radius:10px;line-height:19px;}
+.day.now .dn{background:var(--accent);color:var(--on-accent);}
+.day.sel{box-shadow:inset 0 0 0 2px var(--accent);}
+.day .exam{font-size:10px;font-weight:700;color:var(--late);text-transform:uppercase;letter-spacing:.06em;}
+.chip{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;color:#fff;border-radius:4px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;}
+.chip.done{opacity:.38;text-decoration:line-through;}
+.chip.late{box-shadow:0 0 0 2px var(--late);}
+.chip.more{background:var(--bar);color:var(--muted);}
+.calday{--tc:var(--accent);border-top:1px solid var(--line);}
+.calday h3{margin:0;padding:13px 14px 4px;font-size:14.5px;font-weight:600;}
+.calday .sub{padding:0 14px 10px;font-size:12.5px;color:var(--muted);}
+.calday .ch{border-left:4px solid var(--tc);}
+.calday .empty{padding:4px 14px 16px;color:var(--muted);font-size:13.5px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;padding:10px 14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+.emailctl{white-space:nowrap;}
+.emailctl select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:4px 5px;}
+
 .banner{background:var(--warn-tint);color:var(--warn);border-radius:8px;padding:10px 14px;font-size:13px;margin:16px 0 0;}
 .banner code{font-family:"IBM Plex Mono",monospace;font-size:12px;}
 .hidden{display:none !important;}
@@ -241,6 +275,18 @@ details.method a{color:var(--accent);}
   .ch .note{order:6;flex:1 0 100%;font-size:16px;margin:2px 0 0 -4px;}
   .ch .meta{order:7;flex:1 0 100%;}
   .topicfoot{padding:12px;}
+
+  .calhead{padding:10px 10px;}
+  .calhead h2{font-size:17px;}
+  .calgrid .dow{padding:5px 0;text-align:center;font-size:10px;letter-spacing:.03em;}
+  .day{min-height:64px;padding:3px 2px 4px;gap:2px;}
+  .day .dn{font-size:11px;padding:0 4px;line-height:17px;}
+  .chip{font-size:9px;padding:0 2px;border-radius:3px;text-align:center;}
+  .day .exam{font-size:8.5px;text-align:center;}
+  .emailctl{flex:1 1 100%;}
+  .controls .emailctl input[type=checkbox]{flex:none;width:20px;height:20px;}
+  .controls .emailctl select{font-size:16px;}
+  .controls input[type=number]{flex:0 0 72px;}
   .topicfoot input{font-size:16px;width:64px;}
 }
 </style>
@@ -294,6 +340,10 @@ details.method a{color:var(--accent);}
   </details>
 
   <div class="controls">
+    <div class="segbtn" id="view">
+      <button data-v="list" class="on">Topics</button>
+      <button data-v="cal">Calendar</button>
+    </div>
     <label>Exam <input type="date" id="examdate"></label>
     <label>Review &amp; mock days <input type="number" id="bufferdays" min="0" max="90"></label>
     <span class="spacer"></span>
@@ -303,6 +353,7 @@ details.method a{color:var(--accent);}
       <button data-f="week">Next 7 days</button>
       <button data-f="weak">Weak areas</button>
     </div>
+    <label class="emailctl" title="Emails today's modules to you each morning (set up in the README)"><input type="checkbox" id="emailon"> Daily email at <select id="emailhour"></select></label>
     <button class="btn" id="replan">Re-plan remaining</button>
     <button class="btn ghost" id="backup" title="Download a copy of all progress">Backup</button>
     <button class="btn ghost" id="restore" title="Load a backup file">Restore</button>
@@ -310,6 +361,7 @@ details.method a{color:var(--accent);}
   </div>
 
   <main id="topics"></main>
+  <section class="calendar hidden" id="calendar"></section>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -611,6 +663,8 @@ details.method a{color:var(--accent);}
       state.items = items;
       state.settings = settings;
       render();
+      var tz = browserTZ();
+      if(tz && settings.tz !== tz) write({}, {tz: tz});
     }, function(err){
       if(state.mode !== 'local') startLocal(err && err.code === 'permission-denied' ? 'the database rule isn\'t published yet' : 'offline');
     });
@@ -650,6 +704,8 @@ details.method a{color:var(--accent);}
   var openTopics = null;
   try { openTopics = JSON.parse(localStorage.getItem('aleen-cfa-2027-open') || 'null'); } catch(e){}
   var pendingReplan = false;
+  var view = 'list', calSel = null, calMonth = null;
+  try { view = localStorage.getItem('aleen-cfa-2027-view') === 'cal' ? 'cal' : 'list'; } catch(e){}
 
   function render(){
     var all = list(), today = todayISO(), s = state.settings;
@@ -658,13 +714,17 @@ details.method a{color:var(--accent);}
     st.textContent = state.mode === 'cloud' ? 'Synced' : state.mode === 'local' ? 'Saved in this browser' : 'Connecting…';
     if(!all.length) return;
 
-    var main = document.getElementById('topics');
+    var main = document.getElementById('topics'), cal = document.getElementById('calendar');
     var ae = document.activeElement;
-    var typing = ae && main.contains(ae) && (ae.isContentEditable || ae.classList.contains('pqscore') || ae.classList.contains('ttscore'));
+    var typing = ae && (main.contains(ae) || cal.contains(ae)) && (ae.isContentEditable || ae.classList.contains('pqscore') || ae.classList.contains('ttscore'));
 
     var exam = document.getElementById('examdate'), buf = document.getElementById('bufferdays');
     if(ae !== exam) exam.value = s.exam;
     if(ae !== buf) buf.value = s.buffer;
+    var eon = document.getElementById('emailon'), ehr = document.getElementById('emailhour');
+    eon.checked = s.emailOn !== false;
+    if(ae !== ehr) ehr.value = String(s.emailHour == null ? 7 : s.emailHour);
+    ehr.disabled = !eon.checked;
 
     var reviewStart = addDays(s.exam, -s.buffer);
     var daysLeft = daysBetween(today, s.exam);
@@ -741,6 +801,13 @@ details.method a{color:var(--accent);}
 
     if(typing) return; // don't redraw rows under the cursor; the blur re-renders
 
+    document.querySelectorAll('#view button').forEach(function(b){ b.classList.toggle('on', b.dataset.v === view); });
+    document.getElementById('filter').classList.toggle('hidden', view === 'cal');
+    main.classList.toggle('hidden', view === 'cal');
+    cal.classList.toggle('hidden', view !== 'cal');
+    if(view === 'cal'){ main.innerHTML = ''; cal.innerHTML = calendarHTML(all, today, s); return; }
+    cal.innerHTML = '';
+
     // ---- topics ----
     var weekEnd = addDays(today, 7);
     main.innerHTML = TOPICS.map(function(t){
@@ -771,6 +838,60 @@ details.method a{color:var(--accent);}
         '<div class="tbar"><i style="width:'+(dn/chs.length*100)+'%;background:'+t.color+'"></i></div></summary>' +
         '<div class="rows">' + head + shown.map(function(c){ return rowHTML(c, t, today); }).join('') + '</div>' + foot + '</details>';
     }).join('');
+  }
+
+  // ---- calendar ----
+  // Month grid (weeks start Sunday) with each day's modules as coloured chips.
+  // Picking a day lists its modules below with the same checkboxes as the topic view.
+  var DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function calendarHTML(all, today, s){
+    if(!calSel) calSel = today;
+    if(!calMonth) calMonth = calSel.slice(0, 7);
+    var byDay = {};
+    all.forEach(function(c){ if(c.date) (byDay[c.date] = byDay[c.date] || []).push(c); });
+    var first = parse(calMonth + '-01'), start = iso(first);
+    start = addDays(start, -first.getDay());
+    var last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+    var end = addDays(iso(last), 6 - last.getDay());
+    var reviewStart = addDays(s.exam, -s.buffer);
+    var small = window.matchMedia && window.matchMedia('(max-width:760px)').matches, cap = small ? 3 : 4;
+
+    var html = '<div class="calhead"><h2>' + first.toLocaleDateString(undefined, {month:'long', year:'numeric'}) + '</h2>' +
+      '<button class="calnav" data-cal="prev" aria-label="Previous month">‹</button>' +
+      '<button class="calnav" data-cal="today">Today</button>' +
+      '<button class="calnav" data-cal="next" aria-label="Next month">›</button></div>';
+    html += '<div class="calgrid">' + DOW.map(function(d){ return '<div class="dow">'+(small ? d[0] : d)+'</div>'; }).join('');
+    for(var d = start; d <= end; d = addDays(d, 1)){
+      var items = (byDay[d] || []).slice().sort(function(a,b){ return a.order - b.order; });
+      var cls = 'day';
+      if(d.slice(0, 7) !== calMonth) cls += ' out';
+      if(d >= reviewStart && d < s.exam) cls += ' rev';
+      if(d === today) cls += ' now';
+      if(d === calSel) cls += ' sel';
+      var chips = items.slice(0, items.length > cap ? cap - 1 : cap).map(function(c){
+        var t = topicByKey[c.topic], k = 'chip' + (studied(c) ? ' done' : (d < today ? ' late' : ''));
+        var label = t.review ? (isMock(c) ? 'Mock' : 'Review') : t.code + ' ' + c.num;
+        return '<span class="'+k+'" style="background:'+t.color+'" title="'+esc(t.code+' '+c.num+' · '+c.title)+'">'+esc(label)+'</span>';
+      }).join('');
+      if(items.length > cap) chips += '<span class="chip more">+' + (items.length - cap + 1) + '</span>';
+      html += '<button class="'+cls+'" data-day="'+d+'" aria-label="'+esc(pretty(d, true))+', '+items.length+' items"><span class="dn">'+parse(d).getDate()+'</span>' +
+        (d === s.exam ? '<span class="exam">Exam</span>' : '') + chips + '</button>';
+    }
+    html += '</div>';
+
+    html += '<div class="legend">' + TOPICS.map(function(t){ return '<span><i style="background:'+t.color+'"></i>'+(t.review ? 'Review & mocks' : t.code)+'</span>'; }).join('') + '</div>';
+
+    var dayItems = (byDay[calSel] || []).slice().sort(function(a,b){ return a.order - b.order; });
+    var left = dayItems.filter(function(c){ return !studied(c); }).length;
+    html += '<div class="calday"><h3>' + esc(pretty(calSel, true)) + (calSel === today ? ' · today' : '') + '</h3>';
+    if(dayItems.length){
+      html += '<div class="sub">' + dayItems.length + ' scheduled · ' + (left ? left + ' still to study' : 'all done ✓') + '</div>';
+      html += '<div class="colhead"><span>#</span><span>Module</span><span>Day</span><span>Skim</span><span>Study</span><span>Qs</span><span>Score</span><span>Review</span><span></span></div>';
+      html += dayItems.map(function(c){ var t = topicByKey[c.topic]; return rowHTML(c, t, today).replace('<div class="ch', '<div style="--tc:'+t.color+'" class="ch'); }).join('');
+    } else {
+      html += '<div class="empty">' + (calSel === s.exam ? 'Exam day. Good luck!' : 'Nothing scheduled. Rest day, or get ahead on tomorrow.') + '</div>';
+    }
+    return html + '</div>';
   }
 
   function cb(c, field, label, extra){
@@ -835,7 +956,7 @@ details.method a{color:var(--accent);}
     if(on && field === 'pq'){ p.skim = true; if(!c.study){ p.study = true; p.studyOn = todayISO(); if(partsOf(id).length) p.parts = allParts(id); } }
     patchOne(id, p);
     if(on && field === 'pq'){
-      var inp = document.querySelector('.ch[data-id="'+id+'"] .pqscore');
+      var inp = document.querySelector((view === 'cal' ? '#calendar' : '#topics') + ' .ch[data-id="'+id+'"] .pqscore');
       if(inp && !inp.value) inp.focus();
     }
   }
@@ -852,7 +973,9 @@ details.method a{color:var(--accent);}
     patchOne(id, p);
   }
 
-  var main = document.getElementById('topics');
+  var main = document.getElementById('topics'), calEl = document.getElementById('calendar');
+  [main, calEl].forEach(bindRows);
+  function bindRows(main){
   main.addEventListener('click', function(e){
     var btn = e.target.closest('button[data-act]');
     if(!btn) return;
@@ -896,6 +1019,32 @@ details.method a{color:var(--accent);}
     openTopics = Array.prototype.map.call(main.querySelectorAll('details.topic[open]'), function(d){ return d.dataset.topic; });
     try { localStorage.setItem('aleen-cfa-2027-open', JSON.stringify(openTopics)); } catch(err){}
   }, true);
+  }
+
+  calEl.addEventListener('click', function(e){
+    var day = e.target.closest('button[data-day]'), nav = e.target.closest('button[data-cal]');
+    if(day){ calSel = day.dataset.day; if(calSel.slice(0, 7) !== calMonth) calMonth = calSel.slice(0, 7); render(); }
+    else if(nav){
+      var f = parse(calMonth + '-01');
+      if(nav.dataset.cal === 'today'){ calSel = todayISO(); calMonth = calSel.slice(0, 7); }
+      else { f.setMonth(f.getMonth() + (nav.dataset.cal === 'next' ? 1 : -1)); calMonth = iso(f).slice(0, 7); }
+      render();
+    }
+  });
+  document.getElementById('view').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    view = b.dataset.v;
+    try { localStorage.setItem('aleen-cfa-2027-view', view); } catch(err){}
+    render();
+  });
+
+  // Daily email settings. The time zone comes from this browser so the
+  // emailer knows which day "today" is for you.
+  var ehrSel = document.getElementById('emailhour');
+  for(var h = 4; h <= 22; h++) ehrSel.insertAdjacentHTML('beforeend', '<option value="'+h+'">'+(h < 10 ? '0' : '')+h+':00</option>');
+  function browserTZ(){ try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch(e){ return ''; } }
+  document.getElementById('emailon').addEventListener('change', function(){ write({}, {emailOn: this.checked, tz: browserTZ()}); });
+  ehrSel.addEventListener('change', function(){ write({}, {emailHour: +this.value, tz: browserTZ()}); });
 
   document.getElementById('today').addEventListener('click', function(e){
     var b = e.target.closest('button[data-go]'); if(!b) return;

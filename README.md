@@ -13,13 +13,15 @@ Live site: https://aleenwael.github.io/CFA_Tracker/
 
 `.github/workflows/daily-email.yml` runs every hour and runs `scripts/daily_email.py`. Once a day, at the hour chosen next to **Daily email** on the site (in your own time zone), it emails today's modules with their components, plus anything overdue, practice questions still to do, recall checks and what's coming up.
 
+It sends through [Resend](https://resend.com), an email-sending service, so it never needs access to your own mailbox. On Resend's free plan it can only send to the address you signed up with, which is all this needs.
+
 One-time setup:
 
-1. **Create a Gmail app password.** Your Google account needs 2-Step Verification turned on. Go to https://myaccount.google.com/apppasswords, create one named `CFA Tracker` and copy the 16-character password.
-2. **Add the secrets.** In the repo, go to **Settings → Secrets and variables → Actions → New repository secret** and add:
-   - `GMAIL_USER`: the Gmail address that sends the email
-   - `GMAIL_APP_PASSWORD`: the app password from step 1
-   - `EMAIL_TO` (optional): where to send it. Defaults to `GMAIL_USER`.
-3. **Send a test.** Go to **Actions → Daily study email → Run workflow**.
+1. **Create a Resend account** at https://resend.com/signup, using the email address you want the study emails sent to.
+2. **Create an API key.** In Resend, go to **API Keys → Create API Key**, name it `CFA Tracker` and pick **Sending access**. Copy the key (it starts with `re_`). Resend shows it only once.
+3. **Add the secrets.** In this repo, go to **Settings → Secrets and variables → Actions → New repository secret** and add:
+   - `RESEND_API_KEY`: the key from step 2
+   - `EMAIL_TO`: the email address you signed up to Resend with
+4. **Send a test.** Go to **Actions → Daily study email → Run workflow**.
 
 Untick **Daily email** on the site to pause it. GitHub turns off scheduled workflows in a repo with no commits for 60 days. If that happens, GitHub emails you, and you re-enable it from the Actions tab.

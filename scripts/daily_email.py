@@ -2,8 +2,10 @@
 
 Runs every hour from GitHub Actions (.github/workflows/daily-email.yml).
 Reads the tracker's progress from Firestore and, once a day at the hour set
-on the website, emails the modules scheduled for that day, anything overdue,
-practice questions still to do and recall checks that are due.
+on the website, emails what is overdue first (only the components still to
+do), then the rest of the day's plan, each with a rough time estimate and a
+total to get back on track, followed by practice questions, recall checks
+and what's coming up.
 
 Email goes out through Resend (resend.com), so no access to your own
 mailbox is needed. On Resend's free plan, without a domain of your own, it
@@ -48,8 +50,11 @@ TOPICS = {
     "ai": ("AI", "#6273C4", "Alternative Investments"),
     "ec": ("EC", "#7557B5", "Economics"),
     "qm": ("QM", "#2F5FA8", "Quantitative Methods"),
-    "rev": ("FINAL", "#555B63", "Final Review & Mock Exams"),
+    "rv": ("REV", "#3F5E5A", "Revision"),
+    "rev": ("MOCK", "#555B63", "Mock Exams"),
 }
+REVIEW_TOPICS = ("rv", "rev")
+CONTENT_HOURS = 250  # same estimate as the website: ~250 h for all content, split by module weight
 
 
 # ---------- Firestore ----------
@@ -114,12 +119,28 @@ def pretty(day):
     return f"{d:%a} {d.day} {d:%b}"
 
 
+def fmt_min(m):
+    h, r = divmod(int(m), 60)
+    return (f"{h} h" + (f" {r} min" if r else "")) if h else f"{r} min"
+
+
+def round5(m):
+    return max(5, int(round(m / 5.0)) * 5)
+
+
+def num(v):
+    try:
+        return None if v in ("", None) else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def studied(c):
-    return bool(c.get("done")) if c.get("topic") == "rev" else bool(c.get("study"))
+    return bool(c.get("done")) if c.get("topic") in REVIEW_TOPICS else bool(c.get("study"))
 
 
 def recall_due(c, today):
-    if c.get("topic") == "rev" or not c.get("pq") or not c.get("pqOn"):
+    if c.get("topic") in REVIEW_TOPICS or not c.get("pq") or not c.get("pqOn"):
         return None
     if not c.get("recall1On") and add_days(c["pqOn"], 7) <= today:
         return "1-week recall"
@@ -128,76 +149,171 @@ def recall_due(c, today):
     return None
 
 
+def tag(c):
+    """(code, number, colour) shown for an item; revision entries show the module they revise."""
+    if c.get("topic") == "rv" and c.get("ref"):
+        key, n = c["ref"].split("-")
+        if key in TOPICS:
+            return TOPICS[key][0], int(n), TOPICS[key][1]
+    code, colour, _ = TOPICS[c["topic"]]
+    return code, c.get("num"), colour
+
+
+def pending_steps(c, comps, mpw):
+    """What is left on an item, as (label, minutes) pairs. Mirrors minutesLeft() on the website."""
+    mod = (c.get("weight") or 1) * mpw
+    topic = c.get("topic")
+    if topic == "rv":
+        steps = [("Re-read your notes and the module summary", round5(0.2 * mod))]
+        if num(c.get("cfaiScore")) is None:
+            steps.append(("CFA Institute practice set", 20))
+        if num(c.get("kapScore")) is None:
+            steps.append(("Kaplan practice set", 20))
+        return steps
+    if topic == "rev":
+        return [(c.get("title", ""), 270 if c.get("title", "").lower().startswith("mock exam") else 180)]
+    names = comps.get(c["id"], [])
+    done = c.get("parts") or {}
+    if not names:
+        steps = [("Study the module", round5(mod))]
+    else:
+        per = round5(0.8 * mod / len(names))
+        steps = [(n, per) for i, n in enumerate(names) if not (done.get(str(i)) or done.get(i))]
+    if not c.get("pq"):
+        steps.append(("Practice questions", round5(0.2 * mod)))
+    return steps
+
+
 def build(docs, comps, today):
     settings = docs.get("_settings", {})
     items = [dict(v, id=k) for k, v in docs.items() if k != "_settings" and v.get("topic") in TOPICS]
     items.sort(key=lambda c: c.get("order", 0))
+    content = [c for c in items if c.get("topic") not in REVIEW_TOPICS]
+    total_w = sum(c.get("weight") or 1 for c in content)
+    mpw = CONTENT_HOURS * 60 / total_w if total_w else 150
 
-    todays = [c for c in items if c.get("date") == today and not studied(c)]
     overdue = sorted((c for c in items if c.get("date") and c["date"] < today and not studied(c)),
                      key=lambda c: (c["date"], c.get("order", 0)))
-    recalls = [(c, recall_due(c, today)) for c in items if recall_due(c, today)]
-    need_qs = [c for c in items if c.get("topic") != "rev" and c.get("study") and not c.get("pq")]
+    todays = [c for c in items if c.get("date") == today and not studied(c)]
+    recalls = [c for c in items if recall_due(c, today)]
+    need_qs = [c for c in content if c.get("study") and not c.get("pq")]
     upcoming = sorted((c for c in items if c.get("date", "") > today and not studied(c)),
                       key=lambda c: (c["date"], c.get("order", 0)))[:4]
 
+    left = {c["id"]: pending_steps(c, comps, mpw) for c in overdue + todays}
+    mins = {k: sum(m for _, m in v) for k, v in left.items()}
+    late_min = sum(mins[c["id"]] for c in overdue)
+    today_min = sum(mins[c["id"]] for c in todays)
+    total_min = late_min + today_min
+
     exam = settings.get("exam", "2027-02-22")
     days_left = (dt.date.fromisoformat(exam) - dt.date.fromisoformat(today)).days
-    content = [c for c in items if c.get("topic") != "rev"]
     n_studied = sum(1 for c in content if c.get("study"))
 
-    n_today = len(todays)
-    subject = f"CFA today ({pretty(today)}): " + (
-        ", ".join(f"{TOPICS[c['topic']][0]} {c['num']}" for c in todays[:4]) + ("…" if n_today > 4 else "")
-        if n_today else ("catch up on overdue modules" if overdue else "nothing new scheduled"))
+    def short(c):
+        code, n, _ = tag(c)
+        return ("Revise " if c.get("topic") == "rv" else "") + f"{code} {n}"
+
+    if overdue:
+        subject = f"CFA {pretty(today)}: {len(overdue)} overdue, ≈ {fmt_min(total_min)} to get back on track"
+    elif todays:
+        subject = (f"CFA {pretty(today)}: " + ", ".join(short(c) for c in todays[:3])
+                   + ("…" if len(todays) > 3 else "") + f" (≈ {fmt_min(today_min)})")
+    else:
+        subject = f"CFA {pretty(today)}: on track, nothing new today"
 
     text, html = [], []
-    head = f"{days_left} days to the exam · {n_studied}/{len(content)} modules studied"
-    text.append(head)
-    html.append(f'<p style="color:#6F7782;margin:0 0 16px">{escape(head)}</p>')
+    grey, amber, red = "#6F7782", "#A8591A", "#B23A2B"
+
+    # headline
+    if total_min:
+        headline = f"≈ {fmt_min(total_min)} " + ("to get back on track" if overdue else "for today")
+        split = (f"Overdue ≈ {fmt_min(late_min)} + today ≈ {fmt_min(today_min)}" if overdue and todays else "")
+    else:
+        headline, split = "You're on track. Nothing is due today.", ""
+    stats = f"{days_left} days to the exam · {n_studied}/{len(content)} modules studied"
+    text += [headline] + ([split] if split else []) + [stats]
+    html.append(f'<div style="font-size:22px;font-weight:700;margin:0 0 4px">{escape(headline)}</div>')
+    if split:
+        html.append(f'<div style="color:{grey};font-size:13.5px">{escape(split)}</div>')
+    html.append(f'<div style="color:{grey};font-size:13px;margin:2px 0 6px">{escape(stats)}</div>')
 
     def chip(c):
-        code, colour, _ = TOPICS[c["topic"]]
+        code, n, colour = tag(c)
+        if c.get("topic") == "rv":
+            return (f'<span style="border:1.5px solid {colour};color:{colour};border-radius:4px;padding:0 5px;'
+                    f'font:600 12px monospace">↻ {code} {n}</span>')
         return (f'<span style="background:{colour};color:#fff;border-radius:4px;padding:1px 6px;'
-                f'font:600 12px monospace">{code} {c.get("num")}</span>')
+                f'font:600 12px monospace">{code} {n}</span>')
 
-    def section(title, rows, show_parts=False, tag=None):
+    def heading(title, minutes=None, colour=grey):
+        label = title + (f" · ≈ {fmt_min(minutes)}" if minutes else "")
+        text.append(f"\n{label.upper()}")
+        html.append(f'<h3 style="font:700 12px sans-serif;letter-spacing:.08em;text-transform:uppercase;'
+                    f'color:{colour};margin:24px 0 10px;padding-top:12px;border-top:1px solid #E3E1DB">{escape(label)}</h3>')
+
+    def item(c, note):
+        code, n, _ = tag(c)
+        title = ("Revise: " if c.get("topic") == "rv" else "") + c.get("title", "")
+        names = comps.get(c["id"], []) if c.get("topic") not in REVIEW_TOPICS else []
+        done_n = sum(1 for i in range(len(names)) if (c.get("parts") or {}).get(str(i)))
+        meta = " · ".join(x for x in [note, f"{done_n}/{len(names)} components done" if names else "",
+                                       f"≈ {fmt_min(mins[c['id']])} left"] if x)
+        text.append(f"- {code} {n} {title} ({meta})")
+        html.append(f'<div style="margin:0 0 14px">{chip(c)} <b>{escape(title)}</b>'
+                    f'<div style="color:{grey};font-size:12.5px;margin:3px 0 0">{escape(meta)}</div>')
+        steps = left[c["id"]]
+        if steps:
+            html.append('<table style="border-collapse:collapse;margin:6px 0 0 4px;font-size:13.5px">')
+            for label, m in steps:
+                text.append(f"    [ ] {label}  ≈ {fmt_min(m)}")
+                html.append(f'<tr><td style="padding:2px 10px 2px 0;vertical-align:top">☐ {escape(label)}</td>'
+                            f'<td style="padding:2px 0;color:{grey};white-space:nowrap;vertical-align:top">≈ {fmt_min(m)}</td></tr>')
+            html.append("</table>")
+        html.append("</div>")
+
+    if overdue:
+        heading(f"Overdue ({len(overdue)})", late_min, red)
+        for c in overdue[:8]:
+            item(c, f"was due {pretty(c['date'])}")
+        if len(overdue) > 8:
+            rest = overdue[8:]
+            more = f"+ {len(rest)} more overdue (≈ {fmt_min(sum(mins[c['id']] for c in rest))}), see the tracker"
+            text.append(more)
+            html.append(f'<p style="color:{red};margin:0 0 8px">{escape(more)}</p>')
+
+    heading("Rest of today's plan", today_min, amber)
+    if todays:
+        for c in todays:
+            item(c, "today")
+    else:
+        text.append("Nothing new is scheduled today.")
+        html.append('<p style="margin:0 0 8px">Nothing new is scheduled today.</p>')
+
+    def simple(title, rows, note):
         if not rows:
             return
-        text.append(f"\n{title.upper()}")
-        html.append(f'<h3 style="font:700 12px sans-serif;letter-spacing:.08em;text-transform:uppercase;'
-                    f'color:#6F7782;margin:22px 0 8px">{escape(title)}</h3>')
+        heading(title)
         for c in rows:
-            extra = tag(c) if tag else ""
-            code = TOPICS[c["topic"]][0]
-            text.append(f"- {code} {c.get('num')} {c.get('title', '')}" + (f" ({extra})" if extra else ""))
-            html.append(f'<div style="margin:0 0 10px">{chip(c)} <b>{escape(c.get("title", ""))}</b>'
-                        + (f' <span style="color:#A8591A;font-size:12px">{escape(extra)}</span>' if extra else ""))
-            names = comps.get(c["id"], []) if show_parts else []
-            if names:
-                done = c.get("parts") or {}
-                html.append('<ul style="margin:6px 0 0;padding-left:22px;color:#1F2328;font-size:13.5px">')
-                for i, name in enumerate(names):
-                    tick = bool(done.get(str(i)) or done.get(i))
-                    text.append(f"    [{'x' if tick else ' '}] {name}")
-                    style = "color:#A7ADB5;text-decoration:line-through" if tick else ""
-                    html.append(f'<li style="{style}">{escape(name)}</li>')
-                html.append("</ul>")
-            html.append("</div>")
+            code, n, _ = tag(c)
+            extra = note(c)
+            title = ("Revise: " if c.get("topic") == "rv" else "") + c.get("title", "")
+            text.append(f"- {code} {n} {title}" + (f" ({extra})" if extra else ""))
+            html.append(f'<div style="margin:0 0 8px">{chip(c)} {escape(title)}'
+                        + (f' <span style="color:{grey};font-size:12.5px">· {escape(extra)}</span>' if extra else "")
+                        + "</div>")
 
-    if todays:
-        section("Today's modules", todays, show_parts=True)
-    else:
-        text.append("\nNothing new is scheduled today.")
-        html.append('<p style="margin:0 0 8px">Nothing new is scheduled today.</p>')
-    section("Overdue", overdue[:6], show_parts=not todays, tag=lambda c: f"was due {pretty(c['date'])}")
-    section("Practice questions to do", need_qs[:5])
-    section("Recall checks", [c for c, _ in recalls][:5], tag=lambda c: recall_due(c, today))
-    section("Coming up", upcoming, tag=lambda c: pretty(c["date"]))
+    simple("Practice questions still to do", need_qs[:5],
+           lambda c: f"≈ {fmt_min(round5(0.2 * (c.get('weight') or 1) * mpw))}")
+    simple("Recall checks", recalls[:5], lambda c: f"{recall_due(c, today)} · ≈ 10 min")
+    simple("Coming up", upcoming, lambda c: pretty(c["date"]))
 
-    text.append(f"\nOpen the tracker: {SITE_URL}")
-    html.append(f'<p style="margin:26px 0 0"><a href="{SITE_URL}" style="background:#1E4E8C;color:#fff;'
-                f'padding:9px 16px;border-radius:7px;text-decoration:none;font-weight:600">Open the tracker</a></p>')
+    text.append("\nTimes are rough: about 250 hours for all the content, more for heavier modules.")
+    text.append(f"Open the tracker: {SITE_URL}")
+    html.append(f'<p style="margin:26px 0 8px"><a href="{SITE_URL}" style="background:#1E4E8C;color:#fff;'
+                f'padding:9px 16px;border-radius:7px;text-decoration:none;font-weight:600">Open the tracker</a></p>'
+                f'<p style="color:#A7ADB5;font-size:11.5px;margin:12px 0 0">Times are rough estimates: about 250 hours '
+                f'for all the content, split by module weight.</p>')
     body_html = ('<div style="font-family:-apple-system,Segoe UI,sans-serif;font-size:14px;color:#1F2328;'
                  'max-width:560px">' + "".join(html) + "</div>")
     return subject, "\n".join(text), body_html

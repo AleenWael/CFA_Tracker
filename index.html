@@ -179,6 +179,11 @@ details.method a{color:var(--accent);}
 .cb.on.review{background:#D99A1E;border-color:#D99A1E;}
 .cb .lbl{display:none;}
 
+.ch.rvrow, .colhead.rvhead{grid-template-columns:52px minmax(0,1fr) 128px 58px 72px 72px 26px;}
+.ch .num .tcode{color:#fff;border-radius:4px;padding:1px 5px;font-weight:600;font-size:11.5px;white-space:nowrap;}
+.today .eta{font-size:15px;font-weight:700;color:var(--ink);margin:-2px 0 10px;}
+.today .eta span{font-size:12.5px;font-weight:500;color:var(--muted);}
+
 .topicfoot{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--tc) 6%,var(--surface));font-size:12.5px;color:var(--muted);}
 .topicfoot input{width:58px;font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;background:var(--surface);color:var(--ink);}
 
@@ -200,10 +205,13 @@ details.method a{color:var(--accent);}
 .day.now .dn{background:var(--accent);color:var(--on-accent);}
 .day.sel{box-shadow:inset 0 0 0 2px var(--accent);}
 .day .exam{font-size:10px;font-weight:700;color:var(--late);text-transform:uppercase;letter-spacing:.06em;}
-.chip{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;color:#fff;border-radius:4px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;}
+.chip{display:block;background:var(--cc);font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;color:#fff;border-radius:4px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;}
 .chip.done{opacity:.38;text-decoration:line-through;}
 .chip.late{box-shadow:0 0 0 2px var(--late);}
 .chip.more{background:var(--bar);color:var(--muted);}
+.chip.rvchip{background:color-mix(in srgb,var(--cc) 12%,var(--surface));color:color-mix(in srgb,var(--cc) 80%,var(--ink));box-shadow:inset 0 0 0 1.5px var(--cc);}
+.chip.rvchip.late{box-shadow:inset 0 0 0 1.5px var(--cc),0 0 0 2px var(--late);}
+.legend i.rvkey{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted);}
 .calday{--tc:var(--accent);border-top:1px solid var(--line);}
 .calday h3{margin:0;padding:13px 14px 4px;font-size:14.5px;font-weight:600;}
 .calday .sub{padding:0 14px 10px;font-size:12.5px;color:var(--muted);}
@@ -268,6 +276,7 @@ details.method a{color:var(--accent);}
   .ch .cb.on{color:#fff;}
   .ch .cb .lbl{display:inline;}
   .ch .pqscore{order:5;flex:0 0 58px;height:38px;font-size:16px;border-radius:9px;}
+  .ch .setscore{flex:0 0 84px;}
   .ch > span:empty{display:none;}
   .ch .parts{order:6;flex:1 0 100%;}
   .ch .partlist li{font-size:15px;gap:10px;padding:3px 0;}
@@ -325,8 +334,11 @@ details.method a{color:var(--accent);}
           Do 5–10 quick questions or explain the key formulas from memory. Spaced repetition like this is the
           cheapest way to stop early topics fading by February.</li>
         <li><b>Topic test.</b> When a whole topic is finished, do 20–30 mixed questions on it and enter the score at the bottom of that topic.</li>
-        <li><b>Final review &amp; mocks.</b> The last weeks before the exam are kept free for mixed review and 3 full timed mocks, with repair weeks on your weakest topics in between.
-          Candidates who score 70%+ on mocks pass at a very high rate. In this phase, tick <b>Review</b> on each module as you revisit it. Weakest modules come first.</li>
+        <li><b>Revision, module by module.</b> From 1 January every module comes back once (weakest first after a re-plan) as a
+          <b>Revision</b> entry: re-read your notes and the summary, then do a <b>CFA Institute</b> practice set and a <b>Kaplan</b> practice set
+          and enter both scores. Entering both, or ticking Revised, marks it done. The Review box on a module ticks the same entry.</li>
+        <li><b>Mocks.</b> Three full timed mocks (23 Jan, 6 Feb, 13 Feb), each followed by a debrief day, then a light last week.
+          Candidates who score 70%+ on mocks pass at a very high rate.</li>
       </ol>
       <b>Readiness</b> is your scores weighted by each topic's share of the exam, so on the <b>2027</b> weights. Quant is now 11–14% (up from 6–9%), so a weak Quant score costs as much as a weak FSA one, and Ethics (10–15%) still outweighs Derivatives (6–9%).
       Use <b>Re-plan remaining</b> whenever you fall behind or get ahead: it spreads the unstudied modules evenly up to the review phase.
@@ -428,9 +440,8 @@ details.method a{color:var(--accent);}
       'Statistical Distributions for Financial Asset Prices and Returns','Estimation and Hypothesis Testing',
       'The Return and Risk of a Financial Portfolio','Simulation of Financial Asset Prices and Returns',
       'Applications of Simple Linear Regression in Finance','Introduction to Financial Data Science']},
-    {key:'rev', code:'FINAL', name:'Final Review & Mock Exams', weight:'', mid:0, color:'#555B63', w:1, review:true, mods:[
-      'Review: FSA + Ethics (highest weight, weakest modules first)','Review: Equities + Fixed Income',
-      'Review: Quant, Corporate, Portfolio, Derivatives, Alts, Econ + formula sheet',
+    {key:'rv', code:'REV', name:'Revision: every module + CFAI & Kaplan practice sets', weight:'', mid:0, color:'#3F5E5A', w:1, review:true, revision:true, mods:[]},
+    {key:'rev', code:'MOCK', name:'Mock Exams', weight:'', mid:0, color:'#555B63', w:1, review:true, mods:[
       'Mock exam 1: full, timed','Mock 1 debrief: redo every wrong question, repair weakest topics',
       'Mock exam 2: full, timed','Mock 2 debrief + repair weak modules',
       'Mock exam 3: full, timed','Mock 3 debrief, Ethics re-read, light review and taper']}
@@ -439,10 +450,28 @@ details.method a{color:var(--accent);}
   var DEFAULT_SETTINGS = {exam:'2027-02-22', buffer:52, tt:{}};
   var GOOD = 70, OK = 60;
 
-  // Content runs from today to 31 Dec (exam − 52 review days); the review
-  // and mock items have fixed days in January and February.
-  var FIXED_DATES = {'rev-1':'2027-01-01', 'rev-2':'2027-01-08', 'rev-3':'2027-01-15', 'rev-4':'2027-01-23',
-    'rev-5':'2027-01-24', 'rev-6':'2027-02-06', 'rev-7':'2027-02-07', 'rev-8':'2027-02-13', 'rev-9':'2027-02-15'};
+  // Content runs from today to 31 Dec (exam − 52 review days). The mocks and
+  // their debriefs have fixed days; the revision entries fill the other days
+  // from 1 Jan up to 10 days before the exam.
+  var FIXED_DATES = {'rev-1':'2027-01-23', 'rev-2':'2027-01-24', 'rev-3':'2027-02-06',
+    'rev-4':'2027-02-07', 'rev-5':'2027-02-13', 'rev-6':'2027-02-15'};
+  var REVISION_STOP = 10;   // days before the exam when module revision ends
+
+  // Revision: one entry per module, in study order (rv-1 revises the first
+  // FSA module, and so on). Each has a CFA Institute and a Kaplan practice set.
+  var RV_REF = [], RV_OF = {};
+  TOPICS.forEach(function(t){
+    if(t.review) return;
+    t.mods.forEach(function(_, i){ RV_REF.push(t.key + '-' + (i + 1)); });
+  });
+  RV_REF.forEach(function(ref, i){ RV_OF[ref] = 'rv-' + (i + 1); });
+  TOPICS.forEach(function(t){
+    if(t.revision) TOPICS.forEach(function(m){ if(!m.review) m.mods.forEach(function(title){ t.mods.push(title); }); });
+  });
+
+  // Rough study time, used for the "back on track" estimates (same numbers as
+  // the daily email): about 250 hours for all content, split by module weight.
+  var CONTENT_HOURS = 250;
 
   var topicByKey = {};
   TOPICS.forEach(function(t){ topicByKey[t.key] = t; });
@@ -455,6 +484,22 @@ details.method a{color:var(--accent);}
   function saveOpenParts(){ try { localStorage.setItem('aleen-cfa-2027-parts-open', JSON.stringify(openParts)); } catch(e){} }
   function isRev(c){ return topicByKey[c.topic] && topicByKey[c.topic].review; }
   function isMock(c){ return isRev(c) && /^Mock exam/i.test(c.title); }
+  function isRevision(c){ return c.topic === 'rv'; }
+  function refOf(c){ return isRevision(c) ? (c.ref || RV_REF[c.num - 1]) : c.id; }
+  // Code, number and colour shown for an item; revision entries show the module they revise.
+  function tagOf(c){
+    if(isRevision(c)){
+      var r = String(refOf(c) || '').split('-'), rt = topicByKey[r[0]];
+      if(rt) return {code: rt.code, num: +r[1], color: rt.color};
+    }
+    var t = topicByKey[c.topic] || {};
+    return {code: t.code, num: c.num, color: t.color};
+  }
+  function weightOf(key, n){
+    if(key === 'rv'){ var ref = RV_REF[n - 1] || ''; var rt = topicByKey[ref.split('-')[0]]; return rt ? (HEAVY[ref] || 1) * rt.w : 1; }
+    var t = topicByKey[key];
+    return t ? (HEAVY[key + '-' + n] || 1) * t.w : 1;
+  }
 
   // ---------- small helpers ----------
   function iso(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
@@ -477,8 +522,8 @@ details.method a{color:var(--accent);}
   var DONE_TOPIC = 'qm';
   // Sort position of a module: follows the TOPICS study order.
   function orderOf(key, n){
-    for(var i = 0; i < TOPICS.length; i++) if(TOPICS[i].key === key) return (i + 1) * 1000 + n * 10;
-    return 99000 + n;
+    for(var i = 0; i < TOPICS.length; i++) if(TOPICS[i].key === key) return (i + 1) * 10000 + n * 10;
+    return 999000 + n;
   }
   function seedDocs(){
     var docs = {};
@@ -491,8 +536,9 @@ details.method a{color:var(--accent);}
           skim: before, study: before, pq: before, pqScore: '', review: false, done: false,
           studyOn: '', pqOn: '', reviewOn: '', recall1On: '', recall2On: '',
           parts: before ? allParts(id) : {},
-          note: '', weight: (HEAVY[id] || 1) * t.w
+          note: '', weight: weightOf(t.key, n)
         };
+        if(t.revision){ docs[id].ref = RV_REF[i]; docs[id].cfaiScore = ''; docs[id].kapScore = ''; }
       });
     });
     return docs;
@@ -507,13 +553,35 @@ details.method a{color:var(--accent);}
     if(contentEnd <= from) contentEnd = addDays(from, 1);
     var span = daysBetween(from, contentEnd);
     var content = items.filter(function(c){ return !studied(c) && !isRev(c); });
-    var review = items.filter(function(c){ return !studied(c) && isRev(c); });
+    var review = items.filter(function(c){ return !studied(c) && isRev(c) && !isRevision(c); });
+    var revision = items.filter(function(c){ return !studied(c) && isRevision(c); });
     var total = content.reduce(function(s,c){ return s + (c.weight||1); }, 0) || 1;
     var cum = 0, out = {};
     content.forEach(function(c){
       out[c.id] = addDays(from, Math.min(span-1, Math.floor(cum / total * span)));
       cum += c.weight || 1;
     });
+    // Revision entries: weakest modules first (practice score under 70%), then
+    // study order, spread by weight over the free days around the mocks.
+    var byId = {};
+    items.forEach(function(c){ byId[c.id] = c; });
+    function score(c){ var m = byId[refOf(c)] || (state.items || {})[refOf(c)]; return m ? num(m.pqScore) : null; }
+    revision.sort(function(a, b){
+      var sa = score(a), sb = score(b), wa = sa != null && sa < GOOD, wb = sb != null && sb < GOOD;
+      if(wa !== wb) return wa ? -1 : 1;
+      if(wa && sa !== sb) return sa - sb;
+      return a.order - b.order;
+    });
+    var blocked = {}, days = [], rStart = contentEnd > from ? contentEnd : from, rEnd = addDays(exam, -REVISION_STOP);
+    Object.keys(FIXED_DATES).forEach(function(k){ blocked[FIXED_DATES[k]] = 1; });
+    for(var d = rStart; d <= rEnd; d = addDays(d, 1)) if(!blocked[d]) days.push(d);
+    if(!days.length) days = [rStart];
+    var rTotal = revision.reduce(function(s,c){ return s + (c.weight||1); }, 0) || 1, rCum = 0;
+    revision.forEach(function(c){
+      out[c.id] = days[Math.min(days.length-1, Math.floor(rCum / rTotal * days.length))];
+      rCum += c.weight || 1;
+    });
+
     var rSpan = Math.max(1, daysBetween(contentEnd, exam));
     review.forEach(function(c, i){
       var fixed = FIXED_DATES[c.id];
@@ -578,7 +646,10 @@ details.method a{color:var(--accent);}
   //  v2: Quant marked done.  v3: studied modules get all components ticked.
   //  v4: new topic order (FSA, EQ, FI, ET, CF, PC, DE, AI, EC), content
   //      finishing 31 Dec, review and mocks from 1 Jan.
-  var PLAN_VERSION = 4;
+  //  v5: module-by-module revision entries (seeded as new items); the three
+  //      topic-review blocks go and the mock list becomes six items.
+  //      A deleted item comes back as patches[id] === null.
+  var PLAN_VERSION = 5;
   function migrate(items, settings){
     var patches = {};
     var from = settings.planv || 1;
@@ -587,11 +658,17 @@ details.method a{color:var(--accent);}
     function set(id, p){ Object.assign(items[id], p); patches[id] = Object.assign(patches[id] || {}, p); }
     Object.keys(items).forEach(function(id){
       var c = items[id];
+      if(from < 5 && c.topic === 'rev' && !c.done){
+        var mt = topicByKey.rev.mods[c.num - 1];
+        if(!mt){ delete items[id]; patches[id] = null; return; }
+        if(c.title !== mt) set(id, {title: mt});
+        if(FIXED_DATES[id] && c.date !== FIXED_DATES[id]) set(id, {date: FIXED_DATES[id]});
+      }
       if(from < 2 && c.topic === DONE_TOPIC && !c.study) set(id, {skim: true, study: true, pq: true, date: '', parts: allParts(id)});
       if(c.study && (!c.parts || !Object.keys(c.parts).length)) set(id, {parts: allParts(id)});
       var o = orderOf(c.topic, c.num);
       if(c.order !== o) set(id, {order: o});
-      var w = t0(c.topic) ? (HEAVY[id] || 1) * t0(c.topic).w : null;
+      var w = t0(c.topic) ? weightOf(c.topic, c.num) : null;
       if(w != null && c.weight !== w) set(id, {weight: w});
       var t = topicByKey[c.topic];
       if(from < 4 && t && t.review && !c.done && t.mods[c.num - 1] && c.title !== t.mods[c.num - 1]) set(id, {title: t.mods[c.num - 1]});
@@ -656,7 +733,12 @@ details.method a{color:var(--accent);}
         var missing = seedMissing(items, settings);
         Object.keys(missing).forEach(function(id){ batch.set(col.doc(id), missing[id]); writes++; items[id] = missing[id]; });
         var fixes = migrate(items, settings);
-        Object.keys(fixes).forEach(function(id){ if(missing[id]) batch.set(col.doc(id), missing[id]); else batch.set(col.doc(id), fixes[id], {merge:true}); writes++; });
+        Object.keys(fixes).forEach(function(id){
+          if(fixes[id] === null) batch.delete(col.doc(id));
+          else if(missing[id]) batch.set(col.doc(id), missing[id]);
+          else batch.set(col.doc(id), fixes[id], {merge:true});
+          writes++;
+        });
         if(!hasSettings || writes){ batch.set(col.doc('_settings'), settings, {merge:true}); writes++; }
         if(writes){ batch.commit(); return; }
       }
@@ -679,8 +761,12 @@ details.method a{color:var(--accent);}
   function topicScore(t, chs){
     var tt = num((state.settings.tt || {})[t.key]);
     if(tt != null) return {v: tt, src: 'topic test'};
-    var a = avg(chs.map(function(c){ return num(c.pqScore); }).filter(function(v){ return v != null; }));
-    return {v: a, src: 'module Qs'};
+    var vals = [];
+    chs.forEach(function(c){
+      var r = state.items[RV_OF[c.id]];
+      [c.pqScore, r && r.cfaiScore, r && r.kapScore].forEach(function(x){ x = num(x); if(x != null) vals.push(x); });
+    });
+    return {v: avg(vals), src: 'module Qs and practice sets'};
   }
   function readiness(all){
     var sw = 0, sv = 0;
@@ -698,6 +784,27 @@ details.method a{color:var(--accent);}
     if(c.recall1On && !c.recall2On && addDays(c.recall1On, 21) <= today) return 2;
     return null;
   }
+
+  // ---------- time estimates ----------
+  // Minutes left on an item: a module's time is split 80% over its
+  // components and 20% for practice questions; a revision entry is 20% of
+  // the module's time for re-reading plus 20 minutes per practice set.
+  function round5(m){ return Math.max(5, Math.round(m / 5) * 5); }
+  function minutesPerWeight(all){
+    var w = all.filter(function(c){ return !isRev(c); }).reduce(function(s, c){ return s + (c.weight || 1); }, 0);
+    return w ? CONTENT_HOURS * 60 / w : 150;
+  }
+  function minutesLeft(c, mpw){
+    if(studied(c)) return 0;
+    var mod = (c.weight || 1) * mpw;
+    if(isRevision(c)) return round5(0.2 * mod) + (num(c.cfaiScore) == null ? 20 : 0) + (num(c.kapScore) == null ? 20 : 0);
+    if(isRev(c)) return isMock(c) ? 270 : 180;
+    var names = partsOf(c.id), p = c.parts || {};
+    if(!names.length) return round5(mod);
+    var per = round5(0.8 * mod / names.length);
+    return names.filter(function(_, i){ return !p[i]; }).length * per + (c.pq ? 0 : round5(0.2 * mod));
+  }
+  function fmtMin(m){ var h = Math.floor(m / 60), r = m % 60; return h ? h + ' h' + (r ? ' ' + r + ' min' : '') : r + ' min'; }
 
   // ---------- render ----------
   var filter = 'all';
@@ -736,7 +843,7 @@ details.method a{color:var(--accent);}
     // ---- stats ----
     var content = all.filter(function(c){ return !isRev(c); });
     var nStudied = content.filter(studied).length, nComplete = content.filter(complete).length;
-    var nReviewed = content.filter(function(c){ return c.review; }).length;
+    var nReviewed = all.filter(function(c){ return isRevision(c) && c.done; }).length;
     var late = all.filter(function(c){ return !studied(c) && c.date && c.date < today; });
     var left = content.length - nStudied;
     var studyDaysLeft = Math.max(0, daysBetween(today, reviewStart));
@@ -753,7 +860,7 @@ details.method a{color:var(--accent);}
 
     var statHTML = '';
     statHTML += '<div class="stat c-blue"><div class="k">Modules studied</div><div class="v">'+nStudied+' <small>/ '+content.length+'</small></div>' +
-      '<div class="h">'+nComplete+' with practice Qs · '+nReviewed+' final-reviewed</div>' +
+      '<div class="h">'+nComplete+' with practice Qs · '+nReviewed+' revised</div>' +
       '<div class="bigbar"><div class="seg"><i style="width:'+(nComplete/content.length*100)+'%;background:var(--good)"></i>' +
       '<i style="width:'+((nStudied-nComplete)/content.length*100)+'%;background:var(--warn)"></i></div></div></div>';
     statHTML += '<div class="stat '+(late.length ? 'late c-red' : 'good c-green')+'"><div class="k">Schedule</div><div class="v">' +
@@ -769,19 +876,23 @@ details.method a{color:var(--accent);}
 
     // ---- today ----
     var li = function(c, cls, tag, btn){
-      var t = topicByKey[c.topic];
-      return '<li class="'+cls+'"><span class="tag">'+esc(tag)+'</span><span><b class="tcode" style="background:'+t.color+'">'+t.code+' '+c.num+'</b> '+esc(c.title)+'</span>' +
+      var tg = tagOf(c);
+      return '<li class="'+cls+'"><span class="tag">'+esc(tag)+'</span><span><b class="tcode" style="background:'+tg.color+'">'+(isRevision(c)?'↻ ':'')+tg.code+' '+tg.num+'</b> '+esc((isRevision(c)?'Revise + CFAI & Kaplan sets: ':'')+c.title)+'</span>' +
         (btn ? '<button class="go" data-go="'+btn+'" data-id="'+c.id+'">'+(btn==='study'?'Studied':btn==='done'?'Done':'✓ Recalled')+'</button>' : '') + '</li>';
     };
     var due = all.filter(function(c){ return !studied(c) && c.date && c.date <= today; });
     var nextUp = all.filter(function(c){ return !studied(c) && c.date > today; }).sort(function(a,b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : a.order - b.order; });
     var needQs = content.filter(function(c){ return c.study && !c.pq; });
     var recalls = content.map(function(c){ return {c:c, n:recallDue(c, today)}; }).filter(function(x){ return x.n; });
-    var weak = content.filter(function(c){ var v = num(c.pqScore); return v != null && v < GOOD && !c.review; })
+    var weak = content.filter(function(c){ var v = num(c.pqScore); return v != null && v < GOOD && !(state.items[RV_OF[c.id]] || {}).done; })
       .sort(function(a,b){ return num(a.pqScore) - num(b.pqScore); });
 
     var col1 = '<h2>Today · ' + esc(pretty(today, true)) + '</h2>';
     if(due.length){
+      var mpw = minutesPerWeight(all), lateMin = 0, todayMin = 0;
+      due.forEach(function(c){ if(c.date < today) lateMin += minutesLeft(c, mpw); else todayMin += minutesLeft(c, mpw); });
+      col1 += '<div class="eta">≈ ' + fmtMin(lateMin + todayMin) + (lateMin ? ' to get back on track' : ' for today') +
+        (lateMin && todayMin ? '<span> · overdue ' + fmtMin(lateMin) + ' + today ' + fmtMin(todayMin) + '</span>' : '') + '</div>';
       col1 += '<ul>' + due.map(function(c){
         return c.date < today ? li(c, 'late', 'late ' + pretty(c.date), isRev(c) ? 'done' : 'study') : li(c, '', 'study', isRev(c) ? 'done' : 'study');
       }).join('') + '</ul>';
@@ -822,9 +933,11 @@ details.method a{color:var(--accent);}
       if(filter !== 'all' && !shown.length) return '';
       var dated = chs.map(function(c){ return c.date; }).filter(Boolean).sort();
       var range = dated.length ? pretty(dated[0]) + ' – ' + pretty(dated[dated.length-1]) : 'no dates';
-      var isOpen = filter !== 'all' ? true : (openTopics ? openTopics.indexOf(t.key) !== -1 : dn < chs.length);
+      var isOpen = filter !== 'all' ? true : (openTopics ? openTopics.indexOf(t.key) !== -1 : (t.review ? inReview : dn < chs.length));
       var sc = t.review ? null : topicScore(t, chs);
-      var head = t.review
+      var head = t.revision
+        ? '<div class="colhead rvhead"><span>#</span><span>Module to revise</span><span>Day</span><span>Revised</span><span>CFAI %</span><span>Kaplan %</span><span></span></div>'
+        : t.review
         ? '<div class="colhead"><span>#</span><span>Item</span><span>Day</span><span></span><span></span><span></span><span>Score</span><span>Done</span><span></span></div>'
         : '<div class="colhead"><span>#</span><span>Module</span><span>Day</span><span>Skim</span><span>Study</span><span>Qs</span><span>Score</span><span>Review</span><span></span></div>';
       var foot = t.review ? '' :
@@ -869,9 +982,9 @@ details.method a{color:var(--accent);}
       if(d === today) cls += ' now';
       if(d === calSel) cls += ' sel';
       var chips = items.slice(0, items.length > cap ? cap - 1 : cap).map(function(c){
-        var t = topicByKey[c.topic], k = 'chip' + (studied(c) ? ' done' : (d < today ? ' late' : ''));
-        var label = t.review ? (isMock(c) ? 'Mock' : 'Review') : t.code + ' ' + c.num;
-        return '<span class="'+k+'" style="background:'+t.color+'" title="'+esc(t.code+' '+c.num+' · '+c.title)+'">'+esc(label)+'</span>';
+        var tg = tagOf(c), k = 'chip' + (isRevision(c) ? ' rvchip' : '') + (studied(c) ? ' done' : (d < today ? ' late' : ''));
+        var label = isRevision(c) ? '↻ ' + tg.code + ' ' + tg.num : isRev(c) ? (isMock(c) ? 'Mock' : /debrief/i.test(c.title) ? 'Debrief' : 'Review') : tg.code + ' ' + tg.num;
+        return '<span class="'+k+'" style="--cc:'+tg.color+'" title="'+esc((isRevision(c) ? 'Revise ' : '')+tg.code+' '+tg.num+' · '+c.title)+'">'+esc(label)+'</span>';
       }).join('');
       if(items.length > cap) chips += '<span class="chip more">+' + (items.length - cap + 1) + '</span>';
       html += '<button class="'+cls+'" data-day="'+d+'" aria-label="'+esc(pretty(d, true))+', '+items.length+' items"><span class="dn">'+parse(d).getDate()+'</span>' +
@@ -879,15 +992,23 @@ details.method a{color:var(--accent);}
     }
     html += '</div>';
 
-    html += '<div class="legend">' + TOPICS.map(function(t){ return '<span><i style="background:'+t.color+'"></i>'+(t.review ? 'Review & mocks' : t.code)+'</span>'; }).join('') + '</div>';
+    html += '<div class="legend">' + TOPICS.filter(function(t){ return !t.revision; }).map(function(t){ return '<span><i style="background:'+t.color+'"></i>'+(t.review ? 'Mocks' : t.code)+'</span>'; }).join('') +
+      '<span><i class="rvkey"></i>↻ outlined = revision + practice sets</span></div>';
 
     var dayItems = (byDay[calSel] || []).slice().sort(function(a,b){ return a.order - b.order; });
     var left = dayItems.filter(function(c){ return !studied(c); }).length;
     html += '<div class="calday"><h3>' + esc(pretty(calSel, true)) + (calSel === today ? ' · today' : '') + '</h3>';
     if(dayItems.length){
       html += '<div class="sub">' + dayItems.length + ' scheduled · ' + (left ? left + ' still to study' : 'all done ✓') + '</div>';
-      html += '<div class="colhead"><span>#</span><span>Module</span><span>Day</span><span>Skim</span><span>Study</span><span>Qs</span><span>Score</span><span>Review</span><span></span></div>';
-      html += dayItems.map(function(c){ var t = topicByKey[c.topic]; return rowHTML(c, t, today).replace('<div class="ch', '<div style="--tc:'+t.color+'" class="ch'); }).join('');
+      var groups = [
+        [dayItems.filter(function(c){ return !isRev(c); }), '<span>#</span><span>Module</span><span>Day</span><span>Skim</span><span>Study</span><span>Qs</span><span>Score</span><span>Review</span><span></span>', ''],
+        [dayItems.filter(isRevision), '<span>#</span><span>Module to revise</span><span>Day</span><span>Revised</span><span>CFAI %</span><span>Kaplan %</span><span></span>', ' rvhead'],
+        [dayItems.filter(function(c){ return isRev(c) && !isRevision(c); }), '<span>#</span><span>Item</span><span>Day</span><span></span><span></span><span></span><span>Score</span><span>Done</span><span></span>', '']
+      ];
+      groups.forEach(function(g){
+        if(!g[0].length) return;
+        html += '<div class="colhead'+g[2]+'">'+g[1]+'</div>' + g[0].map(function(c){ return rowHTML(c, topicByKey[c.topic], today); }).join('');
+      });
     } else {
       html += '<div class="empty">' + (calSel === s.exam ? 'Exam day. Good luck!' : 'Nothing scheduled. Rest day, or get ahead on tomorrow.') + '</div>';
     }
@@ -913,7 +1034,35 @@ details.method a{color:var(--accent);}
     return html + '</div>';
   }
 
+  function scoreBox(c, field, label, title){
+    var v = num(c[field]);
+    return '<input class="pqscore setscore '+(v==null?'':band(v))+'" data-field="'+field+'" type="number" min="0" max="100" placeholder="'+label+'" value="'+esc(c[field] == null ? '' : c[field])+'" title="'+title+'">';
+  }
+
+  // A revision entry: re-read the module, then do a CFA Institute and a Kaplan
+  // practice set. Entering both scores (or ticking Revised) marks it done.
+  function rvRowHTML(c, t, today){
+    var tg = tagOf(c), cls = 'ch rvrow';
+    if(c.done) cls += ' complete';
+    if(!c.done && c.date === today) cls += ' is-today';
+    if(!c.done && c.date && c.date < today) cls += ' is-late';
+    var bits = [];
+    if(c.doneOn) bits.push('<span class="ok">Revised ' + pretty(c.doneOn) + '</span>');
+    return '<div class="'+cls+'" data-id="'+c.id+'" style="--tc:'+tg.color+'">' +
+      '<span class="num"><b class="tcode" style="background:'+tg.color+'">'+tg.code+' '+tg.num+'</b></span>' +
+      '<div class="title">'+esc(c.title)+'</div>' +
+      '<input class="date" type="date" required value="'+esc(c.date)+'" title="Revision day">' +
+      cb(c, 'done', 'Revised', 'review') +
+      scoreBox(c, 'cfaiScore', 'CFAI', 'CFA Institute practice set score %') +
+      scoreBox(c, 'kapScore', 'Kaplan', 'Kaplan practice set score %') +
+      '<button class="addnote'+(c.note?' has':'')+'" data-act="note" title="Comments">✎</button>' +
+      '<div class="note" contenteditable="true" data-field="note" data-ph="Comments: weak spots, questions to redo…">'+esc(c.note)+'</div>' +
+      '<div class="meta">'+bits.join('')+'</div>' +
+      '</div>';
+  }
+
   function rowHTML(c, t, today){
+    if(isRevision(c)) return rvRowHTML(c, t, today);
     var cls = 'ch';
     if(complete(c)) cls += ' complete';
     if(!studied(c) && c.date === today) cls += ' is-today';
@@ -926,14 +1075,18 @@ details.method a{color:var(--accent);}
       if(c.pqOn) bits.push('<span>Qs ' + pretty(c.pqOn) + '</span>');
       if(c.recall1On) bits.push('<span class="ok">Recall ✓ ' + pretty(c.recall1On) + '</span>');
       if(c.recall2On) bits.push('<span class="ok">Recall ✓ ' + pretty(c.recall2On) + '</span>');
-      if(c.reviewOn) bits.push('<span class="ok">Final review ' + pretty(c.reviewOn) + '</span>');
+      var rv = state.items[RV_OF[c.id]];
+      if(rv && rv.doneOn) bits.push('<span class="ok">Revised ' + pretty(rv.doneOn) + '</span>');
+      if(rv && num(rv.cfaiScore) != null) bits.push('<span>CFAI set <span class="score '+band(num(rv.cfaiScore))+'">'+esc(rv.cfaiScore)+'%</span></span>');
+      if(rv && num(rv.kapScore) != null) bits.push('<span>Kaplan set <span class="score '+band(num(rv.kapScore))+'">'+esc(rv.kapScore)+'%</span></span>');
     } else if(c.doneOn){
       bits.push('<span class="ok">Done ' + pretty(c.doneOn) + '</span>');
     }
     var mid = isRev(c)
       ? '<span></span><span></span><span></span>' + (isMock(c) ? scoreInput : '<span></span>') + cb(c, 'done', 'Done', 'review')
-      : cb(c, 'skim', 'Skim', 'skim') + cb(c, 'study', 'Study') + cb(c, 'pq', 'Qs') + scoreInput + cb(c, 'review', 'Review', 'review');
-    return '<div class="'+cls+'" data-id="'+c.id+'">' +
+      : cb(c, 'skim', 'Skim', 'skim') + cb(c, 'study', 'Study') + cb(c, 'pq', 'Qs') + scoreInput +
+        cb({review: (state.items[RV_OF[c.id]] || {}).done}, 'review', 'Review', 'review');
+    return '<div class="'+cls+'" data-id="'+c.id+'" style="--tc:'+tagOf(c).color+'">' +
       '<span class="num">'+t.code+' '+c.num+'</span>' +
       '<div class="title" contenteditable="true" data-field="title" spellcheck="false">'+esc(c.title)+'</div>' +
       '<input class="date" type="date" required value="'+esc(c.date)+'" title="Scheduled day">' +
@@ -948,6 +1101,7 @@ details.method a{color:var(--accent);}
   // ---------- interactions ----------
   var ON_FIELD = {study:'studyOn', pq:'pqOn', review:'reviewOn', done:'doneOn'};
   function toggle(id, field){
+    if(field === 'review' && RV_OF[id] && state.items[RV_OF[id]]){ toggle(RV_OF[id], 'done'); return; }
     var c = state.items[id], on = !c[field], p = {};
     p[field] = on;
     if(ON_FIELD[field]) p[ON_FIELD[field]] = on ? todayISO() : '';
@@ -991,6 +1145,14 @@ details.method a{color:var(--accent);}
   main.addEventListener('change', function(e){
     var el = e.target, row = el.closest('.ch');
     if(el.classList.contains('date')) patchOne(row.dataset.id, {date: el.value});
+    else if(el.classList.contains('setscore')){
+      var sv = el.value === '' ? '' : String(Math.max(0, Math.min(100, Math.round(+el.value))));
+      var rc = state.items[row.dataset.id], rp = {};
+      rp[el.dataset.field] = sv;
+      var other = el.dataset.field === 'cfaiScore' ? rc.kapScore : rc.cfaiScore;
+      if(sv !== '' && num(other) != null && !rc.done){ rp.done = true; rp.doneOn = todayISO(); }
+      patchOne(row.dataset.id, rp);
+    }
     else if(el.classList.contains('pqscore')){
       var v = el.value === '' ? '' : String(Math.max(0, Math.min(100, Math.round(+el.value))));
       var c = state.items[row.dataset.id], p = {pqScore: v};

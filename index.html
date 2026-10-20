@@ -164,7 +164,16 @@ details.method a{color:var(--accent);}
 .ch .partsbtn .pbar i{display:block;height:100%;background:var(--tc);}
 .ch .partlist{list-style:none;margin:4px 0 4px;padding:0 0 0 4px;display:flex;flex-direction:column;gap:3px;}
 .ch .partlist li{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.35;}
-.ch .partlist li.on span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint);}
+.ch .partlist .pname{flex:1;min-width:0;}
+.ch .partlist .qscore{flex:none;width:66px;font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:center;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 2px;-moz-appearance:textfield;}
+.ch .partlist .qscore::-webkit-outer-spin-button,.ch .partlist .qscore::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.ch .partlist .qscore.good{background:var(--good-tint);color:var(--good);border-color:transparent;}
+.ch .partlist .qscore.warn{background:var(--warn-tint);color:var(--warn);border-color:transparent;}
+.ch .partlist .qscore.bad{background:var(--late-tint);color:var(--late);border-color:transparent;}
+.ch .partlist li.on .pname{color:var(--muted);}
+.ch .partsbtn .score{font-size:11px;}
+.ch .partsbtn .qmiss{font-size:11px;color:var(--faint);}
+.ch .partlist li.on .pname{text-decoration:line-through;text-decoration-color:var(--faint);}
 .ch .partlist .pcb{flex:none;width:18px;height:18px;border-radius:5px;border:2px solid var(--line-strong);background:transparent;cursor:pointer;padding:0;color:#fff;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;}
 .ch .partlist .pcb:hover{border-color:var(--tc);}
 .ch .partlist li.on .pcb{background:var(--tc);border-color:var(--tc);}
@@ -281,6 +290,7 @@ details.method a{color:var(--accent);}
   .ch .parts{order:6;flex:1 0 100%;}
   .ch .partlist li{font-size:15px;gap:10px;padding:3px 0;}
   .ch .partlist .pcb{width:24px;height:24px;border-radius:7px;font-size:13px;}
+  .ch .partlist .qscore{width:72px;font-size:16px;padding:5px 2px;border-radius:8px;}
   .ch .note{order:6;flex:1 0 100%;font-size:16px;margin:2px 0 0 -4px;}
   .ch .meta{order:7;flex:1 0 100%;}
   .topicfoot{padding:12px;}
@@ -327,7 +337,8 @@ details.method a{color:var(--accent);}
       <ol>
         <li><b>Skim.</b> Before a module, read the Learning Outcome Statements and the summary so you know what you'll be tested on.</li>
         <li><b>Study.</b> Watch the video, read the summary and work through the examples. Open <b>Components</b> under a module to tick off its sub-topics one by one: ticking the last one marks the module studied.</li>
-        <li><b>Practice Qs.</b> Do the end-of-module or question-bank questions the same day or the next, and enter your score.
+        <li><b>Quizzes.</b> After each component, do its Kaplan module quiz and enter the score next to it. The module score is the
+          average of its quizzes, and once every quiz has a score the module's Qs are done. Weak spots show the components you scored lowest on.
           <span class="score good">70%+</span> is on track, <span class="score warn">60–69</span> needs a second look, and
           <span class="score bad">&lt;60</span> is a weak area that gets priority in final review.</li>
         <li><b>Recall checks.</b> 7 days after your practice Qs, and again 3 weeks later, a module shows up under <i>Recall checks</i>.
@@ -479,6 +490,9 @@ details.method a{color:var(--accent);}
   function partsOf(id){ return COMPONENTS[id] || []; }
   function allParts(id){ var o = {}; partsOf(id).forEach(function(_, i){ o[i] = true; }); return o; }
   function partsDone(c){ var p = c.parts || {}; return partsOf(c.id).filter(function(_, i){ return p[i]; }).length; }
+  // Kaplan module-quiz scores, one per component ({index: '0'..'100'}, '' when cleared).
+  function quizScores(c){ var q = c.quiz || {}; return partsOf(c.id).map(function(_, i){ return num(q[i]); }); }
+  function quizAvg(c){ var v = quizScores(c).filter(function(x){ return x != null; }); return v.length ? avg(v) : null; }
   var openParts = {};
   try { openParts = JSON.parse(localStorage.getItem('aleen-cfa-2027-parts-open') || '{}') || {}; } catch(e){}
   function saveOpenParts(){ try { localStorage.setItem('aleen-cfa-2027-parts-open', JSON.stringify(openParts)); } catch(e){} }
@@ -656,7 +670,11 @@ details.method a{color:var(--accent);}
   //      topic-review blocks go and the mock list becomes six items.
   //      A deleted item comes back as patches[id] === null.
   //  v6: finished items move to the day they were finished.
-  var PLAN_VERSION = 6;
+  //  v7: FSA and Equities components follow Kaplan's module split, each with a
+  //      quiz score. Studied modules get every new component ticked; ticks on
+  //      unstudied ones are cleared (set to false: Firestore merges maps).
+  var PLAN_VERSION = 7;
+  var KAPLAN_RESET = {fsa: 1, eq: 1};
   function migrate(items, settings){
     var patches = {};
     var from = settings.planv || 1;
@@ -665,6 +683,14 @@ details.method a{color:var(--accent);}
     function set(id, p){ Object.assign(items[id], p); patches[id] = Object.assign(patches[id] || {}, p); }
     Object.keys(items).forEach(function(id){
       var c = items[id];
+      if(from < 7 && KAPLAN_RESET[c.topic]){
+        if(c.study) set(id, {parts: allParts(id)});
+        else if(c.parts && Object.keys(c.parts).length){
+          var off = {};
+          Object.keys(c.parts).forEach(function(k){ off[k] = false; });
+          set(id, {parts: off});
+        }
+      }
       if(from < 6){
         var on = isRev(c) ? (c.done && c.doneOn) : (c.study && c.studyOn);
         if(on && c.date !== on) set(id, {date: on});
@@ -798,7 +824,8 @@ details.method a{color:var(--accent);}
 
   // ---------- time estimates ----------
   // Minutes left on an item: a module's time is split 80% over its
-  // components and 20% for practice questions; a revision entry is 20% of
+  // components (each with its quiz) — or 80% study + 20% practice questions
+  // for a module without components; a revision entry is 20% of
   // the module's time for re-reading plus 20 minutes per practice set.
   function round5(m){ return Math.max(5, Math.round(m / 5) * 5); }
   function minutesPerWeight(all){
@@ -811,9 +838,9 @@ details.method a{color:var(--accent);}
     if(isRevision(c)) return round5(0.2 * mod) + (num(c.cfaiScore) == null ? 20 : 0) + (num(c.kapScore) == null ? 20 : 0);
     if(isRev(c)) return isMock(c) ? 270 : 180;
     var names = partsOf(c.id), p = c.parts || {};
-    if(!names.length) return round5(mod);
-    var per = round5(0.8 * mod / names.length);
-    return names.filter(function(_, i){ return !p[i]; }).length * per + (c.pq ? 0 : round5(0.2 * mod));
+    if(!names.length) return round5(0.8 * mod) + (c.pq ? 0 : round5(0.2 * mod));
+    var per = round5(mod / names.length);
+    return names.filter(function(_, i){ return !p[i]; }).length * per;
   }
   function fmtMin(m){ var h = Math.floor(m / 60), r = m % 60; return h ? h + ' h' + (r ? ' ' + r + ' min' : '') : r + ' min'; }
 
@@ -834,7 +861,7 @@ details.method a{color:var(--accent);}
 
     var main = document.getElementById('topics'), cal = document.getElementById('calendar');
     var ae = document.activeElement;
-    var typing = ae && (main.contains(ae) || cal.contains(ae)) && (ae.isContentEditable || ae.classList.contains('pqscore') || ae.classList.contains('ttscore'));
+    var typing = ae && (main.contains(ae) || cal.contains(ae)) && (ae.isContentEditable || ae.classList.contains('pqscore') || ae.classList.contains('ttscore') || ae.classList.contains('qscore'));
 
     var exam = document.getElementById('examdate'), buf = document.getElementById('bufferdays');
     if(ae !== exam) exam.value = s.exam;
@@ -895,8 +922,6 @@ details.method a{color:var(--accent);}
     var nextUp = all.filter(function(c){ return !studied(c) && c.date > today; }).sort(function(a,b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : a.order - b.order; });
     var needQs = content.filter(function(c){ return c.study && !c.pq; });
     var recalls = content.map(function(c){ return {c:c, n:recallDue(c, today)}; }).filter(function(x){ return x.n; });
-    var weak = content.filter(function(c){ var v = num(c.pqScore); return v != null && v < GOOD && !(state.items[RV_OF[c.id]] || {}).done; })
-      .sort(function(a,b){ return num(a.pqScore) - num(b.pqScore); });
 
     var col1 = '<h2>Today · ' + esc(pretty(today, true)) + '</h2>';
     if(due.length){
@@ -913,12 +938,27 @@ details.method a{color:var(--accent);}
     if(nextUp.length) col1 += '<h2>Up next</h2><ul>' + nextUp.slice(0, 3).map(function(c){ return li(c, '', pretty(c.date, true)); }).join('') + '</ul>';
 
     var col2 = '';
-    if(needQs.length) col2 += '<h2>Practice Qs to do</h2><ul>' + needQs.slice(0, 4).map(function(c){ return li(c, 'late', 'Qs'); }).join('') + '</ul>';
+    if(needQs.length) col2 += '<h2>Quiz scores to log</h2><ul>' + needQs.slice(0, 4).map(function(c){
+      var names = partsOf(c.id), q = quizScores(c), missing = q.filter(function(x){ return x == null; }).length;
+      return li(c, 'late', names.length ? missing + ' of ' + names.length : 'Qs');
+    }).join('') + '</ul>';
     col2 += '<h2>Recall checks</h2>';
     col2 += recalls.length
       ? '<ul>' + recalls.slice(0, 5).map(function(x){ return li(x.c, '', x.n === 1 ? '1 week' : '1 month', 'recall'); }).join('') + '</ul>'
       : '<div class="none">None due. Modules show up here 7 days after their practice Qs.</div>';
-    if(weak.length) col2 += '<h2>Weak spots (under 70%)</h2><ul>' + weak.slice(0, 4).map(function(c){ return li(c, 'late', c.pqScore + '%'); }).join('') + '</ul>';
+    // Weak spots: component quizzes under 70% (or a module score, for modules without quizzes).
+    var weakParts = [];
+    content.forEach(function(c){
+      if((state.items[RV_OF[c.id]] || {}).done) return;
+      var names = partsOf(c.id), q = quizScores(c), any = false;
+      q.forEach(function(v, i){ if(v != null){ any = true; if(v < GOOD) weakParts.push({c: c, name: names[i], v: v}); } });
+      if(!any){ var v = num(c.pqScore); if(v != null && v < GOOD) weakParts.push({c: c, name: c.title, v: v}); }
+    });
+    weakParts.sort(function(a, b){ return a.v - b.v; });
+    if(weakParts.length) col2 += '<h2>Weak spots (under 70%)</h2><ul>' + weakParts.slice(0, 5).map(function(w){
+      var tg = tagOf(w.c);
+      return '<li class="late"><span class="tag">'+Math.round(w.v)+'%</span><span><b class="tcode" style="background:'+tg.color+'">'+tg.code+' '+tg.num+'</b> '+esc(w.name)+'</span></li>';
+    }).join('') + '</ul>';
     document.getElementById('today').innerHTML = '<div class="col">' + col1 + '</div><div class="col">' + col2 + '</div>';
 
     if(typing) return; // don't redraw rows under the cursor; the blur re-renders
@@ -938,7 +978,7 @@ details.method a{color:var(--accent);}
       var shown = chs.filter(function(c){
         if(filter === 'left') return !studied(c);
         if(filter === 'week') return !complete(c) && c.date && c.date <= weekEnd;
-        if(filter === 'weak') return !isRev(c) && num(c.pqScore) != null && num(c.pqScore) < GOOD;
+        if(filter === 'weak') return !isRev(c) && ((num(c.pqScore) != null && num(c.pqScore) < GOOD) || quizScores(c).some(function(v){ return v != null && v < GOOD; }));
         return true;
       });
       if(filter !== 'all' && !shown.length) return '';
@@ -952,7 +992,7 @@ details.method a{color:var(--accent);}
         ? '<div class="colhead"><span>#</span><span>Item</span><span>Day</span><span></span><span></span><span></span><span>Score</span><span>Done</span><span></span></div>'
         : '<div class="colhead"><span>#</span><span>Module</span><span>Day</span><span>Skim</span><span>Study</span><span>Qs</span><span>Score</span><span>Review</span><span></span></div>';
       var foot = t.review ? '' :
-        '<div class="topicfoot"><label>Topic test (20–30 mixed Qs) <input class="ttscore" type="number" min="0" max="100" data-topic="'+t.key+'" value="'+esc((s.tt||{})[t.key] == null ? '' : s.tt[t.key])+'" placeholder="%"></label>' +
+        '<div class="topicfoot"><label>Kaplan topic quiz <input class="ttscore" type="number" min="0" max="100" data-topic="'+t.key+'" value="'+esc((s.tt||{})[t.key] == null ? '' : s.tt[t.key])+'" placeholder="%"></label>' +
         '<span>' + (sc.v == null ? 'No scores yet' : 'Topic score <span class="score '+band(sc.v)+'">'+Math.round(sc.v)+'%</span> from ' + sc.src) + '</span></div>';
       return '<details class="topic'+(dn===chs.length?' complete':'')+'" style="--tc:'+t.color+'" data-topic="'+t.key+'"'+(isOpen?' open':'')+'>' +
         '<summary><span class="code" style="background:'+t.color+'">'+t.code+'</span>' +
@@ -1034,12 +1074,17 @@ details.method a{color:var(--accent);}
   function partsHTML(c){
     var names = partsOf(c.id);
     if(!names.length) return '';
-    var p = c.parts || {}, n = partsDone(c), open = !!openParts[c.id];
+    var p = c.parts || {}, q = c.quiz || {}, n = partsDone(c), open = !!openParts[c.id], qa = quizAvg(c);
+    var nq = quizScores(c).filter(function(x){ return x != null; }).length;
     var html = '<div class="parts"><button class="partsbtn" data-act="parts" aria-expanded="'+open+'">' +
-      (open ? '▾' : '▸') + ' Components <b>'+n+'/'+names.length+'</b><span class="pbar"><i style="width:'+(n/names.length*100)+'%"></i></span></button>';
+      (open ? '▾' : '▸') + ' Components <b>'+n+'/'+names.length+'</b><span class="pbar"><i style="width:'+(n/names.length*100)+'%"></i></span>' +
+      (qa != null ? ' quizzes <span class="score '+band(qa)+'">'+Math.round(qa)+'%</span>' + (nq < names.length ? ' <span class="qmiss">'+nq+'/'+names.length+'</span>' : '') : '') + '</button>';
     if(open){
       html += '<ul class="partlist">' + names.map(function(name, i){
-        return '<li class="'+(p[i]?'on':'')+'"><button class="pcb" data-act="part" data-i="'+i+'" aria-pressed="'+!!p[i]+'" aria-label="'+esc(name)+'">'+(p[i]?'✓':'')+'</button><span>'+esc(name)+'</span></li>';
+        var v = num(q[i]);
+        return '<li class="'+(p[i]?'on':'')+'"><button class="pcb" data-act="part" data-i="'+i+'" aria-pressed="'+!!p[i]+'" aria-label="'+esc(name)+'">'+(p[i]?'✓':'')+'</button>' +
+          '<span class="pname">'+esc(name)+'</span>' +
+          '<input class="qscore '+(v==null?'':band(v))+'" data-i="'+i+'" type="number" min="0" max="100" inputmode="numeric" placeholder="quiz %" value="'+(v==null?'':v)+'" title="Kaplan module quiz score %" aria-label="Quiz score for '+esc(name)+'"></li>';
       }).join('') + '</ul>';
     }
     return html + '</div>';
@@ -1079,7 +1124,10 @@ details.method a{color:var(--accent);}
     if(!studied(c) && c.date === today) cls += ' is-today';
     if(!studied(c) && c.date && c.date < today) cls += ' is-late';
     var v = num(c.pqScore);
-    var scoreInput = '<input class="pqscore '+(v==null?'':band(v))+'" type="number" min="0" max="100" placeholder="%" value="'+esc(c.pqScore)+'" title="Score %">';
+    var qa = isRev(c) ? null : quizAvg(c);
+    var scoreInput = qa != null
+      ? '<input class="pqscore '+band(qa)+'" type="number" readonly value="'+Math.round(qa)+'" title="Average of your component quiz scores">'
+      : '<input class="pqscore '+(v==null?'':band(v))+'" type="number" min="0" max="100" placeholder="%" value="'+esc(c.pqScore)+'" title="Score %">';
     var bits = [];
     if(!isRev(c)){
       if(c.studyOn) bits.push('<span>Studied ' + pretty(c.studyOn) + '</span>');
@@ -1126,6 +1174,24 @@ details.method a{color:var(--accent);}
     }
   }
 
+  // Entering a component's quiz score ticks that component; the module score
+  // becomes the quiz average, and once every quiz has a score the module's Qs
+  // are done (which starts its recall checks).
+  function setQuiz(id, i, raw){
+    var c = state.items[id], names = partsOf(id);
+    var quiz = Object.assign({}, c.quiz || {}), parts = Object.assign({}, c.parts || {});
+    var v = raw === '' ? '' : String(Math.max(0, Math.min(100, Math.round(+raw))));
+    quiz[i] = v;
+    if(v !== '') parts[i] = true;
+    var p = {quiz: quiz, parts: parts};
+    var scores = names.map(function(_, k){ return num(quiz[k]); }), have = scores.filter(function(x){ return x != null; });
+    p.pqScore = have.length ? String(Math.round(avg(have))) : '';
+    if(names.some(function(_, k){ return parts[k]; }) && !c.skim) p.skim = true;
+    if(names.every(function(_, k){ return parts[k]; }) && !c.study){ p.study = true; p.studyOn = todayISO(); }
+    if(have.length === names.length && !c.pq){ p.pq = true; p.pqOn = todayISO(); }
+    patchOne(id, p);
+  }
+
   // Ticking a component; ticking the last one marks the module studied.
   function togglePart(id, i){
     var c = state.items[id], parts = Object.assign({}, c.parts || {});
@@ -1156,6 +1222,7 @@ details.method a{color:var(--accent);}
   main.addEventListener('change', function(e){
     var el = e.target, row = el.closest('.ch');
     if(el.classList.contains('date')) patchOne(row.dataset.id, {date: el.value});
+    else if(el.classList.contains('qscore')) setQuiz(row.dataset.id, +el.dataset.i, el.value);
     else if(el.classList.contains('setscore')){
       var sv = el.value === '' ? '' : String(Math.max(0, Math.min(100, Math.round(+el.value))));
       var rc = state.items[row.dataset.id], rp = {};

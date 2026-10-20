@@ -7,7 +7,7 @@ Live site: https://aleenwael.github.io/CFA_Tracker/
 - **Topics / Calendar** switches between the topic list and a month calendar of what's scheduled each day.
 - Progress syncs across devices through Firebase (Firestore collection `cfa2027`, project `cfa-tracker-fbb69`). If the database can't be reached, the site falls back to saving in the browser.
 - **Backup** / **Restore** download and load a copy of all progress.
-- Module components (sub-topics) live in `components.js`.
+- Module components live in `components.js`. FSA and Equities follow Kaplan Schweser's module split. Each component has a box for its Kaplan module quiz score; the module score is the average, and Weak spots list the components you scored under 70%.
 - **Revision (1 Jan – 12 Feb):** every module has a revision entry with a CFA Institute practice set and a Kaplan practice set. Entering both scores (or ticking Revised) marks it done. Mocks are on 23 Jan, 6 Feb and 13 Feb.
 
 ## Daily study email

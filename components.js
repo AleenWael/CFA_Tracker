@@ -1,9 +1,10 @@
 // Component (sub-topic) breakdown of every learning module, keyed by module id.
-// Each list follows the main sections of the module so they can be ticked off
-// one at a time. FSA 3–12 follow the section headings of the 2027 CFA
-// Institute curriculum table of contents. Edit freely: add, remove or rename lines to match your
-// Kaplan portal. Ticks are stored by position, so keep existing lines in place
-// when adding new ones at the end.
+// Each component is ticked off, with its quiz score, as it is studied.
+// FSA and Equities follow Kaplan Schweser's module split (Readings 27–50),
+// so each component has its own Kaplan module quiz; the other topics are
+// best-guess section lists until they are matched to Kaplan too.
+// Ticks and quiz scores are stored by position: when a list changes, the
+// tracker's plan version must reset that module's ticks (see migrate()).
 window.CFA_COMPONENTS = {
   // ---------- Quantitative Methods ----------
   'qm-1': ['Holding period return','Arithmetic, geometric and harmonic means','Money-weighted vs time-weighted returns','Annualized returns','Continuously compounded returns'],
@@ -26,19 +27,19 @@ window.CFA_COMPONENTS = {
   'pc-5': ['Belief perseverance biases','Information processing biases','Emotional biases','Behavioral finance and market anomalies'],
   'pc-6': ['Risk management framework','Risk governance and risk tolerance','Risk budgeting','Financial vs non-financial risks','Measuring and modifying risk'],
 
-  // ---------- Financial Statement Analysis ----------
-  'fsa-1': ['Roles of financial reporting and analysis','Primary financial statements and notes','MD&A, auditor\'s report and other sources','Financial statement analysis framework','Financial reporting standards (IFRS vs US GAAP)'],
-  'fsa-2': ['Income statement components and formats','Revenue recognition','Expense recognition','Non-recurring items and accounting changes','Basic and diluted EPS','Common-size analysis and comprehensive income'],
-  'fsa-3': ['Intangible assets: identifiable intangibles','Goodwill','Financial instruments','Non-current liabilities: long-term financial liabilities and deferred tax liabilities','Ratios and common-size analysis: common-size balance sheet and balance sheet ratios'],
-  'fsa-4': ['Linkages between the financial statements (incl. current assets and current liabilities)','Direct method for cash flows from operating activities','Indirect method for cash flows from operating activities','Conversion from the indirect to the direct method','Cash flows from investing activities','Cash flows from financing activities: long-term debt, common stock, dividends paid','Differences between US GAAP and IFRS cash flow statements'],
-  'fsa-5': ['Evaluating sources and uses of cash: the four steps','Ratios and common-size analysis','Free cash flow measures','Cash flow ratios'],
-  'fsa-6': ['Inventory valuation','Effects of inflation and deflation on inventories, cost of sales and gross margin','Presentation and disclosure','Inventory ratios'],
-  'fsa-7': ['Acquisition of intangible assets: purchased, developed internally, business combinations','Impairment of property, plant and equipment','Impairment of intangible assets: finite and indefinite lives','Impairment of long-lived assets held for sale and reversals of impairments','Derecognition','Presentation and disclosure','Using disclosures in analysis'],
-  'fsa-8': ['Leases: requirements, examples and advantages of leasing','Lease classification: finance vs operating','Lessee accounting: IFRS vs US GAAP','Lessor accounting','Employee and deferred compensation','Defined-benefit pension plans: IFRS vs US GAAP and pension disclosures','Share-based compensation: stock grants, stock options, other types','Presentation and disclosure: leases, postemployment plans, share-based compensation'],
-  'fsa-9': ['Differences between accounting profit and taxable income','Taxable and deductible temporary differences','Permanent differences and tax expense','Deferred tax assets and liabilities: realizability of DTAs','Corporate income tax rates','Presentation and disclosure'],
-  'fsa-10': ['Conceptual overview','GAAP, decision-useful financial reporting','Biased accounting choices and earnings management','Departures from GAAP','Conservative vs aggressive accounting','Context: motivations and conditions for low-quality reporting','Mechanisms that discipline reporting quality: regulators, auditors, private contracting','Detecting quality issues: presentation choices','Accounting choices and estimates: effects on earnings and balance sheet','Accounting choices that affect the cash flow statement','Accounting choices that affect financial reporting','Warning signs'],
-  'fsa-11': ['The financial analysis process: objectives, computation vs analysis','Analytical tools and techniques','Financial ratio analysis: universe, value, limitations and sources of ratios','Common-size balance sheets and income statements','Cross-sectional and trend analysis, relationships among statements','Graphs and regression analysis','Ratio categories, interpretation and context','Activity ratios','Liquidity ratios','Solvency ratios','Profitability ratios','Integrated financial ratio analysis','DuPont analysis: decomposing ROE','Industry-specific financial ratios','Model building and forecasting'],
-  'fsa-12': ['Building a model: company overview and revenue forecast','COGS, SG&A and other operating expenses','Operating profit by segment, non-operating items, income tax and shares outstanding','Pro forma income statement and statement of cash flows','Capital investment, depreciation and working capital forecasts','Forecasted cash flow statement, balance sheet and valuation inputs','Behavioral biases in analyst forecasts','Competitive factors in prices and costs (Cognac industry case)','Modeling inflation and deflation: sales and cost projections','Forecast horizon and long-term forecasting (normalized revenue case)'],
+  // ---------- Financial Statement Analysis (Kaplan Readings 27–38) ----------
+  'fsa-1': ['27.1 Financial Statement Roles'],
+  'fsa-2': ['28.1 Revenue Recognition','28.2 Expense Recognition','28.3 Nonrecurring Items','28.4 Earnings Per Share','28.5 Ratios and Common-Size Income Statements'],
+  'fsa-3': ['29.1 Intangible Assets and Marketable Securities','29.2 Common-Size Balance Sheets'],
+  'fsa-4': ['30.1 Cash Flow Introduction and Direct Method CFO','30.2 Indirect Method CFO','30.3 Investing and Financing Cash Flows and IFRS/US GAAP Differences'],
+  'fsa-5': ['31.1 Analyzing Statements of Cash Flows II'],
+  'fsa-6': ['32.1 Inventory Measurement','32.2 Inflation Impact on FIFO and LIFO','32.3 Presentation and Disclosure'],
+  'fsa-7': ['33.1 Intangible Long-Lived Assets','33.2 Impairment and Derecognition','33.3 Long-Term Asset Disclosures'],
+  'fsa-8': ['34.1 Leases','34.2 Deferred Compensation and Disclosures'],
+  'fsa-9': ['35.1 Differences Between Accounting Profit and Taxable Income','35.2 Deferred Tax Assets and Liabilities','35.3 Tax Rates and Disclosures'],
+  'fsa-10': ['36.1 Reporting Quality','36.2 Accounting Choices and Estimates','36.3 Warning Signs'],
+  'fsa-11': ['37.1 Introduction to Financial Ratios','37.2 Financial Ratios, Part 1','37.3 Financial Ratios, Part 2','37.4 DuPont Analysis','37.5 Industry-Specific Financial Ratios'],
+  'fsa-12': ['38.1 Financial Statement Modeling'],
 
   // ---------- Corporate Finance ----------
   'cf-1': ['Business structures and features','Public vs private companies','Equity vs debt claims','Listing and ownership structure'],
@@ -49,19 +50,19 @@ window.CFA_COMPONENTS = {
   'cf-6': ['Factors affecting capital structure','Modigliani–Miller propositions','Cost of financial distress and optimal structure','Pecking order and agency costs','Stakeholder interests and target structure','Weighted average cost of capital'],
   'cf-7': ['Business model features','Pricing models','Business model types','Value chain and competitive position'],
 
-  // ---------- Equities ----------
-  'eq-1': ['Common vs preferred shares','Voting and dividend rights','Preferred share features','Public vs private equity','Risk and return of equity securities'],
-  'eq-2': ['Equity share classes and dual-class structures','Voting process: proxy and cumulative voting','Cross-border listings and depository receipts','Shareholder rights across jurisdictions'],
-  'eq-3': ['Primary markets: IPOs, seasoned offerings, private placements, rights','Secondary markets and order types','Market structures: quote-, order- and brokered','Long, short and margin positions','Execution, validity and clearing'],
-  'eq-4': ['Total return: dividends and price change','Return decomposition: growth, multiples, yield','Security market indexes: construction and weighting','Market efficiency forms','Market anomalies'],
-  'eq-5': ['Intrinsic value vs market price','Categories of valuation models','Dividends, splits and buybacks','Asset-based valuation'],
-  'eq-6': ['Dividend discount model','Gordon growth model','Multistage DDM','Preferred stock valuation','FCFE model','Sustainable growth rate'],
-  'eq-7': ['Price multiples: P/E, P/B, P/S, P/CF','Justified multiples from fundamentals','Method of comparables','Enterprise value multiples'],
-  'eq-8': ['Revenue forecasting approaches','Operating costs and margins','Capex and balance sheet forecasts','Building pro forma statements','Sensitivity and scenario analysis'],
-  'eq-9': ['Industry classification systems','Industry life cycle','Porter\'s five forces','Competitive strategies','Macro and external influences'],
-  'eq-10': ['Business model and revenue drivers','Historical performance analysis','Competitive position','Forecasting and scenarios','ESG considerations'],
-  'eq-11': ['Elements of an effective research report','Investment thesis and recommendation','Valuation summary and key risks','Professional and regulatory considerations'],
-  'eq-12': ['CAPM and cost of equity','Market model and beta estimation','Multifactor models','Applications of factor models'],
+  // ---------- Equities (Kaplan Readings 39–50) ----------
+  'eq-1': ['39.1 Public and Private Equity Investments'],
+  'eq-2': ['40.1 Rights of Equity Shareholders'],
+  'eq-3': ['41.1 Equity Markets and Exchanges','41.2 Equity Indexes and Liquidity Measures'],
+  'eq-4': ['42.1 Dividends, Stock Splits, and Share Repurchases','42.2 Return Calculations for Equities'],
+  'eq-5': ['43.1 Measures and Models of Equity Value'],
+  'eq-6': ['44.1 Cash Flow Metrics','44.2 Valuation Models','44.3 Model Limitations and Preferred Stock Valuation'],
+  'eq-7': ['45.1 Price Multiples and Equity Valuation','45.2 Price and Enterprise Value Multiples','45.3 Peer Groups and Multiples-Based Valuation'],
+  'eq-8': ['46.1 Financial Statement Forecast Models','46.2 Models Based on Company Characteristics'],
+  'eq-9': ['47.1 Industry Analysis Framework','47.2 Porter\'s Five Forces and PESTLE Analysis'],
+  'eq-10': ['48.1 Corporate Strategy and Industry Position','48.2 Revenue, Profitability, and Capital'],
+  'eq-11': ['49.1 Equity Analyst Research Reports'],
+  'eq-12': ['50.1 Estimating the Cost of Equity With the Market Model and CAPM','50.2 Arbitrage Pricing Theory'],
 
   // ---------- Fixed Income ----------
   'fi-1': ['Bond features: issuer, maturity, par, coupon, currency','Bond indenture and covenants','Seniority and collateral','Legal, regulatory and tax considerations'],

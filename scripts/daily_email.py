@@ -174,11 +174,10 @@ def pending_steps(c, comps, mpw):
         return [(c.get("title", ""), 270 if c.get("title", "").lower().startswith("mock exam") else 180)]
     names = comps.get(c["id"], [])
     done = c.get("parts") or {}
-    if not names:
-        steps = [("Study the module", round5(mod))]
-    else:
-        per = round5(0.8 * mod / len(names))
-        steps = [(n, per) for i, n in enumerate(names) if not (done.get(str(i)) or done.get(i))]
+    if names:  # each component includes its Kaplan module quiz
+        per = round5(mod / len(names))
+        return [(n + " + quiz", per) for i, n in enumerate(names) if not (done.get(str(i)) or done.get(i))]
+    steps = [("Study the module", round5(0.8 * mod))]
     if not c.get("pq"):
         steps.append(("Practice questions", round5(0.2 * mod)))
     return steps
@@ -303,12 +302,17 @@ def build(docs, comps, today):
                         + (f' <span style="color:{grey};font-size:12.5px">· {escape(extra)}</span>' if extra else "")
                         + "</div>")
 
-    simple("Practice questions still to do", need_qs[:5],
-           lambda c: f"≈ {fmt_min(round5(0.2 * (c.get('weight') or 1) * mpw))}")
+    def missing_quizzes(c):
+        names = comps.get(c["id"], [])
+        if not names:
+            return f"≈ {fmt_min(round5(0.2 * (c.get('weight') or 1) * mpw))}"
+        q = c.get("quiz") or {}
+        return f"{sum(1 for i in range(len(names)) if num(q.get(str(i))) is None)} of {len(names)} quiz scores missing"
+    simple("Quiz scores still to log", need_qs[:5], missing_quizzes)
     simple("Recall checks", recalls[:5], lambda c: f"{recall_due(c, today)} · ≈ 10 min")
     simple("Coming up", upcoming, lambda c: pretty(c["date"]))
 
-    text.append("\nTimes are rough: about 250 hours for all the content, more for heavier modules.")
+    text.append("\nTimes are rough: about 250 hours for all the content, more for heavier modules; each component includes its quiz.")
     text.append(f"Open the tracker: {SITE_URL}")
     html.append(f'<p style="margin:26px 0 8px"><a href="{SITE_URL}" style="background:#1E4E8C;color:#fff;'
                 f'padding:9px 16px;border-radius:7px;text-decoration:none;font-weight:600">Open the tracker</a></p>'

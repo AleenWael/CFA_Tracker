@@ -628,7 +628,13 @@ details.method a{color:var(--accent);}
     }
     render();
   }
-  function patchOne(id, p){ var o = {}; o[id] = p; write(o); }
+  function patchOne(id, p){
+    // Finishing a module (or a revision entry or mock) moves its day to the
+    // day it was actually finished.
+    var c = state.items[id];
+    if(c && ((p.study === true && !c.study) || (p.done === true && !c.done))) p.date = todayISO();
+    var o = {}; o[id] = p; write(o);
+  }
 
   function seedMissing(existing, settings){
     // Only creates chapters that don't exist yet, so this can never duplicate.
@@ -649,7 +655,8 @@ details.method a{color:var(--accent);}
   //  v5: module-by-module revision entries (seeded as new items); the three
   //      topic-review blocks go and the mock list becomes six items.
   //      A deleted item comes back as patches[id] === null.
-  var PLAN_VERSION = 5;
+  //  v6: finished items move to the day they were finished.
+  var PLAN_VERSION = 6;
   function migrate(items, settings){
     var patches = {};
     var from = settings.planv || 1;
@@ -658,6 +665,10 @@ details.method a{color:var(--accent);}
     function set(id, p){ Object.assign(items[id], p); patches[id] = Object.assign(patches[id] || {}, p); }
     Object.keys(items).forEach(function(id){
       var c = items[id];
+      if(from < 6){
+        var on = isRev(c) ? (c.done && c.doneOn) : (c.study && c.studyOn);
+        if(on && c.date !== on) set(id, {date: on});
+      }
       if(from < 5 && c.topic === 'rev' && !c.done){
         var mt = topicByKey.rev.mods[c.num - 1];
         if(!mt){ delete items[id]; patches[id] = null; return; }

@@ -631,6 +631,15 @@ details.method a{color:var(--accent);}
   // Daily snapshots kept in this browser (the last 7 days), so a bad change
   // can be rolled back from "Roll back to…" next to Restore.
   var BK_PREFIX = 'aleen-cfa-2027-bk-', BK_KEEP = 7;
+  // The copy this browser held before it was first refreshed from the
+  // database, kept untouched so it can be downloaded and checked.
+  var OLD_KEY = 'aleen-cfa-2027-earlier-copy';
+  function keepEarlierCopy(){
+    try {
+      var prev = localStorage.getItem(LS_KEY);
+      if(prev && !localStorage.getItem(OLD_KEY)) localStorage.setItem(OLD_KEY, prev);
+    } catch(e){}
+  }
   function snapshotKeys(){
     var keys = [];
     try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k && k.indexOf(BK_PREFIX) === 0) keys.push(k); } } catch(e){}
@@ -648,10 +657,12 @@ details.method a{color:var(--accent);}
   function fillSnapshots(){
     var sel = document.getElementById('snapshots'); if(!sel) return;
     var keys = snapshotKeys();
+    var old = false;
+    try { old = !!localStorage.getItem(OLD_KEY); } catch(e){}
     sel.innerHTML = '<option value="">Roll back to…</option>' + keys.map(function(k){
       return '<option value="'+k+'">'+esc(pretty(k.slice(BK_PREFIX.length), true))+' (start of day)</option>';
-    }).join('');
-    sel.classList.toggle('hidden', !keys.length);
+    }).join('') + (old ? '<option value="__earlier">Download this browser\'s earlier copy</option>' : '');
+    sel.classList.toggle('hidden', !keys.length && !old);
   }
 
   function write(patches, settingsPatch){
@@ -818,7 +829,7 @@ details.method a{color:var(--accent);}
       state.settings = settings;
       render();
       // Keep this browser's copy current, so an old copy can never be uploaded later.
-      if(!snap.metadata.fromCache){ lsSave(); dailySnapshot(); }
+      if(!snap.metadata.fromCache){ keepEarlierCopy(); lsSave(); dailySnapshot(); }
       var tz = browserTZ();
       if(tz && settings.tz !== tz) write({}, {tz: tz});
     }, function(err){
@@ -1374,6 +1385,13 @@ details.method a{color:var(--accent);}
   document.getElementById('snapshots').addEventListener('change', function(){
     var key = this.value; this.value = '';
     if(!key) return;
+    if(key === '__earlier'){
+      var raw = ''; try { raw = localStorage.getItem(OLD_KEY) || ''; } catch(e){}
+      var blob = new Blob([raw], {type:'application/json'}), a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'cfa-browser-earlier-copy.json'; a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+      return;
+    }
     var data; try { data = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e){}
     if(!data || !data.items) return;
     if(!confirm('Roll back all progress to ' + pretty(key.slice(BK_PREFIX.length), true) + '? Anything done since then is replaced.')) return;

@@ -234,6 +234,50 @@ details.method a{color:var(--accent);}
 .emailctl{white-space:nowrap;}
 .emailctl select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:4px 5px;}
 
+/* notes */
+.notebox{white-space:pre-wrap;outline:none;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);padding:7px 9px;font-size:13.5px;line-height:1.5;min-height:2.3em;cursor:text;}
+.notebox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint);}
+.notebox:empty:before{content:attr(data-ph);color:var(--faint);}
+.notebtn{font:inherit;font-size:12.5px;border:0;background:none;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:4px;}
+.notebtn:hover,.notebtn.has{color:var(--accent);}
+.topicnote{padding:0 14px 12px;background:color-mix(in srgb,var(--tc) 6%,var(--surface));}
+.ch .partlist .cnbtn{flex:none;border:0;background:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;}
+.ch .partlist .cnbtn:hover,.ch .partlist .cnbtn.has{color:var(--accent);}
+.ch .partlist li.cnote{display:block;padding:0 0 4px 26px;}
+.ch .partlist li.cnote .notebox{font-size:12.5px;padding:5px 8px;min-height:1.9em;}
+.notesview{margin-bottom:14px;}
+.nvhead{display:flex;gap:10px;align-items:center;margin-bottom:14px;}
+.nvhead input{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px;}
+.nsec{--tc:var(--accent);background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--tc);border-radius:10px;padding:12px 16px 14px;margin-bottom:14px;}
+.nsec > h2{font-size:15.5px;margin:0 0 10px;display:flex;align-items:center;gap:10px;color:color-mix(in srgb,var(--tc) 70%,var(--ink));}
+.nsec > h2 .code{font-family:"IBM Plex Mono",monospace;font-size:12px;color:#fff;background:var(--tc);border-radius:5px;padding:2px 7px;}
+.nsec .empty{color:var(--muted);font-size:13.5px;margin:2px 0;}
+.ncard{border:1px solid var(--line);border-radius:9px;padding:8px 10px 8px;margin-bottom:10px;background:var(--paper);}
+.ncard .nchead{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;}
+.ncard .ntitle{flex:1;font-weight:600;font-size:14.5px;border-color:transparent;background:transparent;padding:3px 4px;min-height:0;}
+.ncard .ntitle:focus{background:var(--surface);}
+.ndel{border:0;background:none;color:var(--faint);cursor:pointer;font-size:13px;padding:4px 6px;border-radius:5px;}
+.ndel:hover{color:var(--late);background:var(--late-tint);}
+.nmeta{font-size:11.5px;color:var(--faint);margin-top:5px;}
+.nlabel{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin:12px 0 5px;}
+.nmod{border-top:1px solid var(--line);padding-top:10px;margin-top:12px;}
+.nmodhead{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:14px;}
+.nmodhead .tcode{color:#fff;border-radius:4px;padding:1px 5px;font-size:12px;font-family:"IBM Plex Mono",monospace;flex:none;}
+.nmodhead .ttl{flex:1;min-width:0;}
+.ngo{font:inherit;font-size:12px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);border-radius:6px;padding:2px 8px;cursor:pointer;flex:none;}
+.ngo:hover{color:var(--accent);border-color:var(--accent);}
+details.ncomps{margin-top:8px;}
+details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
+.ncomp{margin:8px 0 0 14px;}
+.ncomp .ncname{font-size:12.5px;color:var(--muted);margin-bottom:3px;}
+.ncomp .notebox{font-size:13px;}
+.nadd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-top:1px solid var(--line);margin-top:12px;padding-top:10px;font-size:12.5px;color:var(--muted);}
+.nadd span{margin-right:2px;}
+.nchip{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;border:1px dashed var(--tc);color:color-mix(in srgb,var(--tc) 80%,var(--ink));background:color-mix(in srgb,var(--tc) 8%,var(--surface));border-radius:6px;padding:3px 8px;cursor:pointer;}
+.nchip:hover{border-style:solid;}
+.flash{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:var(--today-tint);}100%{background:transparent;}}
+
 .banner{background:var(--warn-tint);color:var(--warn);border-radius:8px;padding:10px 14px;font-size:13px;margin:16px 0 0;}
 .banner code{font-family:"IBM Plex Mono",monospace;font-size:12px;}
 .hidden{display:none !important;}
@@ -367,6 +411,7 @@ details.method a{color:var(--accent);}
     <div class="segbtn" id="view">
       <button data-v="list" class="on">Topics</button>
       <button data-v="cal">Calendar</button>
+      <button data-v="notes">Notes</button>
     </div>
     <label>Exam <input type="date" id="examdate"></label>
     <label>Review &amp; mock days <input type="number" id="bufferdays" min="0" max="90"></label>
@@ -387,6 +432,13 @@ details.method a{color:var(--accent);}
 
   <main id="topics"></main>
   <section class="calendar hidden" id="calendar"></section>
+  <section class="notesview hidden" id="notesview">
+    <div class="nvhead">
+      <input type="search" id="notesearch" placeholder="Search your notes" aria-label="Search notes">
+      <button class="btn" id="newnote">+ New note</button>
+    </div>
+    <div id="noteslist"></div>
+  </section>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -669,7 +721,8 @@ details.method a{color:var(--accent);}
     Object.keys(patches).forEach(function(id){ Object.assign(state.items[id], patches[id]); });
     if(settingsPatch){
       if(settingsPatch.tt) state.settings.tt = Object.assign({}, state.settings.tt, settingsPatch.tt);
-      Object.keys(settingsPatch).forEach(function(k){ if(k !== 'tt') state.settings[k] = settingsPatch[k]; });
+      if(settingsPatch.notes) state.settings.notes = deepMerge(state.settings.notes || {}, settingsPatch.notes);
+      Object.keys(settingsPatch).forEach(function(k){ if(k !== 'tt' && k !== 'notes') state.settings[k] = settingsPatch[k]; });
     }
     if(state.mode === 'cloud'){
       var b = db.batch();
@@ -681,6 +734,37 @@ details.method a{color:var(--accent);}
     }
     render();
   }
+  function isObj(x){ return x && typeof x === 'object' && !Array.isArray(x); }
+  function deepMerge(a, b){
+    var out = Object.assign({}, a);
+    Object.keys(b).forEach(function(k){ out[k] = isObj(b[k]) && isObj(out[k]) ? deepMerge(out[k], b[k]) : b[k]; });
+    return out;
+  }
+
+  // ---------- notes ----------
+  // Stored in settings.notes: {topics: {fsa: text}, general: {id: {title, body, created, updated, deleted}}}.
+  // Reading notes live on each module (note) and Kaplan module notes on its components (cnotes: {i: text}).
+  function notesOf(){ var n = state.settings.notes || {}; return {topics: n.topics || {}, general: n.general || {}}; }
+  function writeNotes(patch){ write({}, {notes: patch}); }
+  function saveNote(key, text){
+    var k = key.split(':'), now = new Date().toISOString();
+    if(k[0] === 'module'){ if(state.items[k[1]] && (state.items[k[1]].note || '') !== text) patchOne(k[1], {note: text}); }
+    else if(k[0] === 'comp'){
+      var c = state.items[k[1]]; if(!c) return;
+      var cn = Object.assign({}, c.cnotes || {});
+      if((cn[k[2]] || '') === text) return;
+      cn[k[2]] = text; patchOne(k[1], {cnotes: cn});
+    }
+    else if(k[0] === 'topic'){ if((notesOf().topics[k[1]] || '') === text) return; var t = {}; t[k[1]] = text; writeNotes({topics: t}); }
+    else if(k[0] === 'gen'){
+      var g = notesOf().general[k[1]] || {}; if((g[k[2]] || '') === text) return;
+      var o = {}; o[k[1]] = {updated: now}; o[k[1]][k[2]] = text; writeNotes({general: o});
+    }
+  }
+  function noteBox(key, text, ph, cls){
+    return '<div class="notebox '+(cls||'')+'" contenteditable="true" spellcheck="true" data-note="'+esc(key)+'" data-ph="'+esc(ph)+'">'+esc(text || '')+'</div>';
+  }
+
   function patchOne(id, p){
     // Finishing a module (or a revision entry or mock) moves its day to the
     // day it was actually finished.
@@ -898,7 +982,8 @@ details.method a{color:var(--accent);}
   try { openTopics = JSON.parse(localStorage.getItem('aleen-cfa-2027-open') || 'null'); } catch(e){}
   var pendingReplan = false;
   var view = 'list', calSel = null, calMonth = null;
-  try { view = localStorage.getItem('aleen-cfa-2027-view') === 'cal' ? 'cal' : 'list'; } catch(e){}
+  try { var v0 = localStorage.getItem('aleen-cfa-2027-view'); view = (v0 === 'cal' || v0 === 'notes') ? v0 : 'list'; } catch(e){}
+  var noteSearch = '', openTopicNotes = {}, openCompNotes = {}, openNComps = {}, openNoteMods = {};
 
   function render(){
     var all = list(), today = todayISO(), s = state.settings;
@@ -907,9 +992,9 @@ details.method a{color:var(--accent);}
     st.textContent = state.mode === 'cloud' ? 'Synced' : state.mode === 'local' ? 'Saved in this browser' : 'Connecting…';
     if(!all.length) return;
 
-    var main = document.getElementById('topics'), cal = document.getElementById('calendar');
+    var main = document.getElementById('topics'), cal = document.getElementById('calendar'), nv = document.getElementById('notesview');
     var ae = document.activeElement;
-    var typing = ae && (main.contains(ae) || cal.contains(ae)) && (ae.isContentEditable || ae.classList.contains('pqscore') || ae.classList.contains('ttscore') || ae.classList.contains('qscore'));
+    var typing = ae && (main.contains(ae) || cal.contains(ae) || nv.contains(ae)) && ae.id !== 'notesearch' && (ae.isContentEditable || ae.classList.contains('pqscore') || ae.classList.contains('ttscore') || ae.classList.contains('qscore'));
 
     var exam = document.getElementById('examdate'), buf = document.getElementById('bufferdays');
     if(ae !== exam) exam.value = s.exam;
@@ -1012,10 +1097,13 @@ details.method a{color:var(--accent);}
     if(typing) return; // don't redraw rows under the cursor; the blur re-renders
 
     document.querySelectorAll('#view button').forEach(function(b){ b.classList.toggle('on', b.dataset.v === view); });
-    document.getElementById('filter').classList.toggle('hidden', view === 'cal');
-    main.classList.toggle('hidden', view === 'cal');
+    document.getElementById('filter').classList.toggle('hidden', view !== 'list');
+    main.classList.toggle('hidden', view !== 'list');
     cal.classList.toggle('hidden', view !== 'cal');
+    nv.classList.toggle('hidden', view !== 'notes');
+    if(view !== 'notes') document.getElementById('noteslist').innerHTML = '';
     if(view === 'cal'){ main.innerHTML = ''; cal.innerHTML = calendarHTML(all, today, s); return; }
+    if(view === 'notes'){ main.innerHTML = ''; cal.innerHTML = ''; document.getElementById('noteslist').innerHTML = notesHTML(all); return; }
     cal.innerHTML = '';
 
     // ---- topics ----
@@ -1041,7 +1129,9 @@ details.method a{color:var(--accent);}
         : '<div class="colhead"><span>#</span><span>Module</span><span>Day</span><span>Skim</span><span>Study</span><span>Qs</span><span>Score</span><span>Review</span><span></span></div>';
       var foot = t.review ? '' :
         '<div class="topicfoot"><label>Kaplan topic quiz <input class="ttscore" type="number" min="0" max="100" data-topic="'+t.key+'" value="'+esc((s.tt||{})[t.key] == null ? '' : s.tt[t.key])+'" placeholder="%"></label>' +
-        '<span>' + (sc.v == null ? 'No scores yet' : 'Topic score <span class="score '+band(sc.v)+'">'+Math.round(sc.v)+'%</span> from ' + sc.src) + '</span></div>';
+        '<span>' + (sc.v == null ? 'No scores yet' : 'Topic score <span class="score '+band(sc.v)+'">'+Math.round(sc.v)+'%</span> from ' + sc.src) + '</span>' +
+        '<button class="notebtn'+(notesOf().topics[t.key] ? ' has' : '')+'" data-topicnote="'+t.key+'">✎ Topic notes</button></div>' +
+        (notesOf().topics[t.key] || openTopicNotes[t.key] ? '<div class="topicnote">'+noteBox('topic:'+t.key, notesOf().topics[t.key], 'Notes for the whole topic: themes, formulas, what to revisit…')+'</div>' : '');
       return '<details class="topic'+(dn===chs.length?' complete':'')+'" style="--tc:'+t.color+'" data-topic="'+t.key+'"'+(isOpen?' open':'')+'>' +
         '<summary><span class="code" style="background:'+t.color+'">'+t.code+'</span>' +
         '<div><div class="name">'+esc(t.name)+'</div><div class="meta">'+(t.weight ? 'Exam weight '+t.weight+' · ' : '')+range+'</div></div>' +
@@ -1050,6 +1140,65 @@ details.method a{color:var(--accent);}
         '<div class="tbar"><i style="width:'+(dn/chs.length*100)+'%;background:'+t.color+'"></i></div></summary>' +
         '<div class="rows">' + head + shown.map(function(c){ return rowHTML(c, t, today); }).join('') + '</div>' + foot + '</details>';
     }).join('');
+  }
+
+  // ---- notes view ----
+  // General notes first, then study notes grouped by topic: the topic note,
+  // then every studied reading (or one with notes) with its note and the
+  // notes on its Kaplan modules. Everything is editable in place.
+  function notesHTML(all){
+    var q = noteSearch.trim().toLowerCase(), N = notesOf();
+    function has(){ if(!q) return true; for(var i = 0; i < arguments.length; i++) if(String(arguments[i] || '').toLowerCase().indexOf(q) !== -1) return true; return false; }
+    var html = '<section class="nsec"><h2>General notes</h2>';
+    var gen = Object.keys(N.general).map(function(id){ return Object.assign({id: id}, N.general[id]); })
+      .filter(function(g){ return !g.deleted && has(g.title, g.body); })
+      .sort(function(a, b){ return (b.created || '') < (a.created || '') ? -1 : 1; });
+    html += gen.length ? gen.map(function(g){
+      return '<div class="ncard"><div class="nchead">' + noteBox('gen:'+g.id+':title', g.title, 'Title', 'ntitle') +
+        '<button class="ndel" data-delnote="'+esc(g.id)+'" title="Delete this note">Delete</button></div>' +
+        noteBox('gen:'+g.id+':body', g.body, 'Write your note: formulas, exam tips, reminders…') +
+        (g.updated ? '<div class="nmeta">Edited '+esc(pretty(g.updated.slice(0, 10), true))+'</div>' : '') + '</div>';
+    }).join('') : '<p class="empty">' + (q ? 'No general notes match.' : 'No general notes yet. Tap “+ New note” to add one.') + '</p>';
+    html += '</section>';
+
+    var shown = 0;
+    TOPICS.forEach(function(t){
+      if(t.review) return;
+      var tnote = N.topics[t.key] || '';
+      var chs = all.filter(function(c){ return c.topic === t.key; });
+      function hasNotes(c){ var cn = c.cnotes || {}; return !!c.note || Object.keys(cn).some(function(k){ return cn[k]; }); }
+      // Full blocks for readings with notes (or opened to add one); studied ones without notes become chips.
+      var mods = chs.filter(function(c){
+        var cn = c.cnotes || {};
+        if(q) return has(c.title, c.note) || partsOf(c.id).some(function(n, i){ return has(n, cn[i]); });
+        return hasNotes(c) || openNoteMods[c.id];
+      });
+      var chips = q ? [] : chs.filter(function(c){ return c.study && !hasNotes(c) && !openNoteMods[c.id]; });
+      if(q && !has(t.name, tnote) && !mods.length) return;
+      if(!q && !tnote && !mods.length && !chips.length) return;
+      shown++;
+      html += '<section class="nsec" style="--tc:'+t.color+'"><h2><span class="code">'+t.code+'</span>'+esc(t.name)+'</h2>' +
+        '<div class="nlabel">Topic notes</div>' + noteBox('topic:'+t.key, tnote, 'Notes for the whole topic: themes, formulas, what to revisit…');
+      mods.forEach(function(c){
+        var names = partsOf(c.id), cn = c.cnotes || {}, nC = names.filter(function(_, i){ return cn[i]; }).length;
+        var openC = openNComps[c.id] != null ? openNComps[c.id] : (nC > 0 || (q && names.some(function(n, i){ return has(n, cn[i]); })));
+        html += '<div class="nmod"><div class="nmodhead"><b class="tcode" style="background:'+t.color+'">'+t.code+' '+c.num+'</b><span class="ttl">'+esc(c.title)+'</span>' +
+          '<button class="ngo" data-goto="'+c.id+'">Open</button></div>' +
+          noteBox('module:'+c.id, c.note, 'Notes for this reading…');
+        if(names.length){
+          html += '<details class="ncomps" data-mod="'+c.id+'"'+(openC ? ' open' : '')+'><summary>Kaplan modules · '+(nC ? nC+' note'+(nC>1?'s':'') : 'add a note')+'</summary>' +
+            names.map(function(n, i){ return '<div class="ncomp"><div class="ncname">'+esc(n)+'</div>'+noteBox('comp:'+c.id+':'+i, cn[i], 'Note on this Kaplan module…')+'</div>'; }).join('') +
+            '</details>';
+        }
+        html += '</div>';
+      });
+      if(chips.length) html += '<div class="nadd"><span>Add a note to</span>' + chips.map(function(c){
+        return '<button class="nchip" data-addnote="'+c.id+'" title="'+esc(c.title)+'" style="--tc:'+t.color+'">'+t.code+' '+c.num+'</button>';
+      }).join('') + '</div>';
+      html += '</section>';
+    });
+    if(!shown) html += '<p class="empty">' + (q ? 'No study notes match.' : 'Study notes appear here for each topic you have started. You can also add them from the Topics view with ✎.') + '</p>';
+    return html;
   }
 
   // ---- calendar ----
@@ -1122,7 +1271,7 @@ details.method a{color:var(--accent);}
   function partsHTML(c){
     var names = partsOf(c.id);
     if(!names.length) return '';
-    var p = c.parts || {}, q = c.quiz || {}, n = partsDone(c), open = !!openParts[c.id], qa = quizAvg(c);
+    var p = c.parts || {}, q = c.quiz || {}, cn = c.cnotes || {}, n = partsDone(c), open = !!openParts[c.id], qa = quizAvg(c);
     var nq = quizScores(c).filter(function(x){ return x != null; }).length;
     var html = '<div class="parts"><button class="partsbtn" data-act="parts" aria-expanded="'+open+'">' +
       (open ? '▾' : '▸') + ' Components <b>'+n+'/'+names.length+'</b><span class="pbar"><i style="width:'+(n/names.length*100)+'%"></i></span>' +
@@ -1132,7 +1281,9 @@ details.method a{color:var(--accent);}
         var v = num(q[i]);
         return '<li class="'+(p[i]?'on':'')+'"><button class="pcb" data-act="part" data-i="'+i+'" aria-pressed="'+!!p[i]+'" aria-label="'+esc(name)+'">'+(p[i]?'✓':'')+'</button>' +
           '<span class="pname">'+esc(name)+'</span>' +
-          '<input class="qscore '+(v==null?'':band(v))+'" data-i="'+i+'" type="number" min="0" max="100" inputmode="numeric" placeholder="quiz %" value="'+(v==null?'':v)+'" title="Kaplan module quiz score %" aria-label="Quiz score for '+esc(name)+'"></li>';
+          '<input class="qscore '+(v==null?'':band(v))+'" data-i="'+i+'" type="number" min="0" max="100" inputmode="numeric" placeholder="quiz %" value="'+(v==null?'':v)+'" title="Kaplan module quiz score %" aria-label="Quiz score for '+esc(name)+'">' +
+          '<button class="cnbtn'+(cn[i] ? ' has' : '')+'" data-act="cnote" data-i="'+i+'" title="Note on this Kaplan module" aria-label="Note on '+esc(name)+'">✎</button></li>' +
+          (cn[i] || openCompNotes[c.id+':'+i] ? '<li class="cnote">'+noteBox('comp:'+c.id+':'+i, cn[i], 'Note on '+name+'…')+'</li>' : '');
       }).join('') + '</ul>';
     }
     return html + '</div>';
@@ -1256,6 +1407,8 @@ details.method a{color:var(--accent);}
   [main, calEl].forEach(bindRows);
   function bindRows(main){
   main.addEventListener('click', function(e){
+    var tn = e.target.closest('[data-topicnote]');
+    if(tn){ var tk = tn.dataset.topicnote; openTopicNotes[tk] = 1; render(); var tb = main.querySelector('[data-note="topic:'+tk+'"]'); if(tb) tb.focus(); return; }
     var btn = e.target.closest('button[data-act]');
     if(!btn) return;
     var row = btn.closest('.ch'), id = row.dataset.id;
@@ -1266,6 +1419,10 @@ details.method a{color:var(--accent);}
       saveOpenParts(); render();
     }
     else if(btn.dataset.act === 'part') togglePart(id, +btn.dataset.i);
+    else if(btn.dataset.act === 'cnote'){
+      openCompNotes[id+':'+btn.dataset.i] = 1; render();
+      var cb2 = main.querySelector('[data-note="comp:'+id+':'+btn.dataset.i+'"]'); if(cb2) cb2.focus();
+    }
   });
   main.addEventListener('change', function(e){
     var el = e.target, row = el.closest('.ch');
@@ -1291,12 +1448,13 @@ details.method a{color:var(--accent);}
     }
   });
   main.addEventListener('keydown', function(e){
-    if(e.target.isContentEditable && e.key === 'Enter' && !(e.target.dataset.field === 'note' && e.shiftKey)){ e.preventDefault(); e.target.blur(); }
+    // Enter finishes a title; notes keep Enter for new lines.
+    if(e.target.isContentEditable && e.key === 'Enter' && e.target.dataset.field === 'title'){ e.preventDefault(); e.target.blur(); }
     if(e.target.tagName === 'INPUT' && e.key === 'Enter') e.target.blur();
   });
   main.addEventListener('focusout', function(e){
     var el = e.target;
-    if(el.isContentEditable){
+    if(el.isContentEditable && el.dataset.field){
       var id = el.closest('.ch').dataset.id, field = el.dataset.field, val = (field === 'note' ? el.innerText : el.textContent).trim();
       if(state.items[id][field] !== val){ var p = {}; p[field] = val; patchOne(id, p); return; }
     }
@@ -1319,6 +1477,49 @@ details.method a{color:var(--accent);}
       render();
     }
   });
+  // Notes: every note box saves when you leave it.
+  document.addEventListener('focusout', function(e){
+    var el = e.target;
+    if(!el || !el.dataset || !el.dataset.note) return;
+    // Save once focus has moved on, so clicking straight into the next note
+    // box isn't lost to a re-render (render skips rows while you're typing).
+    var key = el.dataset.note, text = el.innerText.replace(/\s+$/, '');
+    setTimeout(function(){ saveNote(key, text); var a = document.activeElement; if(!a || a === document.body) render(); }, 0);
+  });
+  var nvEl = document.getElementById('notesview');
+  document.getElementById('notesearch').addEventListener('input', function(){ noteSearch = this.value; render(); });
+  document.getElementById('newnote').addEventListener('click', function(){
+    var id = 'n' + Date.now().toString(36), now = new Date().toISOString(), o = {};
+    o[id] = {title: '', body: '', created: now, updated: now};
+    noteSearch = ''; document.getElementById('notesearch').value = '';
+    writeNotes({general: o});
+    var t = nvEl.querySelector('[data-note="gen:'+id+':title"]'); if(t) t.focus();
+  });
+  nvEl.addEventListener('click', function(e){
+    var del = e.target.closest('[data-delnote]'), go = e.target.closest('[data-goto]'), add = e.target.closest('[data-addnote]');
+    if(add){
+      openNoteMods[add.dataset.addnote] = 1; render();
+      var box = nvEl.querySelector('[data-note="module:'+add.dataset.addnote+'"]'); if(box) box.focus();
+    } else if(del){
+      if(!confirm('Delete this note?')) return;
+      var o = {}; o[del.dataset.delnote] = {deleted: true, updated: new Date().toISOString()};
+      writeNotes({general: o});
+    } else if(go){
+      var id = go.dataset.goto, c = state.items[id]; if(!c) return;
+      view = 'list'; filter = 'all';
+      try { localStorage.setItem('aleen-cfa-2027-view', view); } catch(err){}
+      openTopics = openTopics || TOPICS.map(function(t){ return t.key; });
+      if(openTopics.indexOf(c.topic) === -1) openTopics.push(c.topic);
+      openParts[id] = 1;
+      render();
+      var row = document.querySelector('#topics .ch[data-id="'+id+'"]');
+      if(row){ row.scrollIntoView({block: 'center'}); row.classList.add('flash'); }
+    }
+  });
+  nvEl.addEventListener('toggle', function(e){
+    if(e.target.matches && e.target.matches('details.ncomps')) openNComps[e.target.dataset.mod] = e.target.open;
+  }, true);
+
   document.getElementById('view').addEventListener('click', function(e){
     var b = e.target.closest('button'); if(!b) return;
     view = b.dataset.v;

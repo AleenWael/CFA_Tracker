@@ -100,6 +100,7 @@ details.method a{color:var(--accent);}
 .controls label{display:flex;align-items:center;gap:6px;}
 .controls input{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:5px 7px;}
 .controls input[type=number]{width:56px;}
+.controls select#snapshots{font:inherit;font-size:13px;color:var(--accent);background:var(--surface);border:1px solid var(--accent);border-radius:7px;padding:6px 8px;}
 .controls .spacer{flex:1;}
 .segbtn{display:inline-flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden;}
 .segbtn button{font-size:12.5px;border:0;background:var(--surface);color:var(--muted);padding:6px 11px;cursor:pointer;}
@@ -381,6 +382,7 @@ details.method a{color:var(--accent);}
     <button class="btn ghost" id="backup" title="Download a copy of all progress">Backup</button>
     <button class="btn ghost" id="restore" title="Load a backup file">Restore</button>
     <input type="file" id="restorefile" accept="application/json,.json" hidden>
+    <select id="snapshots" class="hidden" title="Daily snapshots kept in this browser"></select>
   </div>
 
   <main id="topics"></main>
@@ -626,6 +628,32 @@ details.method a{color:var(--accent);}
   function lsLoad(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){ return null; } }
   function lsSave(){ try { localStorage.setItem(LS_KEY, JSON.stringify({items: state.items, settings: state.settings})); } catch(e){} }
 
+  // Daily snapshots kept in this browser (the last 7 days), so a bad change
+  // can be rolled back from "Roll back to…" next to Restore.
+  var BK_PREFIX = 'aleen-cfa-2027-bk-', BK_KEEP = 7;
+  function snapshotKeys(){
+    var keys = [];
+    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k && k.indexOf(BK_PREFIX) === 0) keys.push(k); } } catch(e){}
+    return keys.sort().reverse();
+  }
+  function dailySnapshot(){
+    if(!Object.keys(state.items).length) return;
+    try {
+      var key = BK_PREFIX + todayISO();
+      if(!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({items: state.items, settings: state.settings, at: new Date().toISOString()}));
+      snapshotKeys().slice(BK_KEEP).forEach(function(k){ localStorage.removeItem(k); });
+    } catch(e){}
+    fillSnapshots();
+  }
+  function fillSnapshots(){
+    var sel = document.getElementById('snapshots'); if(!sel) return;
+    var keys = snapshotKeys();
+    sel.innerHTML = '<option value="">Roll back to…</option>' + keys.map(function(k){
+      return '<option value="'+k+'">'+esc(pretty(k.slice(BK_PREFIX.length), true))+' (start of day)</option>';
+    }).join('');
+    sel.classList.toggle('hidden', !keys.length);
+  }
+
   function write(patches, settingsPatch){
     Object.keys(patches).forEach(function(id){ Object.assign(state.items[id], patches[id]); });
     if(settingsPatch){
@@ -731,6 +759,7 @@ details.method a{color:var(--accent);}
     Object.assign(state.items, seedMissing(state.items, state.settings));
     migrate(state.items, state.settings);
     lsSave();
+    dailySnapshot();
     if(reason){
       var b = document.getElementById('rulebanner');
       b.textContent = 'Saving in this browser only (' + reason + ').';
@@ -747,7 +776,12 @@ details.method a{color:var(--accent);}
     } catch(e){ startLocal('Firebase unavailable'); return; }
 
     var first = true;
-    col.onSnapshot(function(snap){
+    col.onSnapshot({includeMetadataChanges: true}, function(snap){
+      // A snapshot served from the local cache can be empty or out of date
+      // (slow or patchy connection). Never act on one at start-up: wait for
+      // the server. Acting on an empty cache snapshot once overwrote all
+      // progress with an old copy saved in a browser.
+      if(first && snap.metadata.fromCache) return;
       var items = {}, settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), hasSettings = false;
       snap.docs.forEach(function(d){
         if(d.id === '_settings'){ hasSettings = true; Object.assign(settings, d.data()); }
@@ -759,11 +793,12 @@ details.method a{color:var(--accent);}
         document.getElementById('rulebanner').classList.add('hidden');
         var saved = lsLoad(), batch = db.batch(), writes = 0;
         if(!Object.keys(items).length && saved && saved.items && Object.keys(saved.items).length){
-          // Carry over anything saved in this browser before cloud sync was set up.
+          // The server confirmed the database is empty: carry over what this
+          // browser saved before cloud sync existed (merged, never replacing).
           saved.settings = Object.assign({}, settings, saved.settings);
           migrate(saved.items, saved.settings);
-          Object.keys(saved.items).forEach(function(id){ batch.set(col.doc(id), saved.items[id]); writes++; });
-          batch.set(col.doc('_settings'), saved.settings);
+          Object.keys(saved.items).forEach(function(id){ if(saved.items[id]) batch.set(col.doc(id), saved.items[id], {merge:true}); writes++; });
+          batch.set(col.doc('_settings'), saved.settings, {merge:true});
           batch.commit();
           return;
         }
@@ -782,6 +817,8 @@ details.method a{color:var(--accent);}
       state.items = items;
       state.settings = settings;
       render();
+      // Keep this browser's copy current, so an old copy can never be uploaded later.
+      if(!snap.metadata.fromCache){ lsSave(); dailySnapshot(); }
       var tz = browserTZ();
       if(tz && settings.tz !== tz) write({}, {tz: tz});
     }, function(err){
@@ -1333,6 +1370,16 @@ details.method a{color:var(--accent);}
     a.download = 'aleen-cfa-backup-' + todayISO() + '.json';
     a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  });
+  document.getElementById('snapshots').addEventListener('change', function(){
+    var key = this.value; this.value = '';
+    if(!key) return;
+    var data; try { data = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e){}
+    if(!data || !data.items) return;
+    if(!confirm('Roll back all progress to ' + pretty(key.slice(BK_PREFIX.length), true) + '? Anything done since then is replaced.')) return;
+    var patches = {};
+    Object.keys(data.items).forEach(function(id){ state.items[id] = state.items[id] || {}; patches[id] = data.items[id]; });
+    write(patches, data.settings || {});
   });
   var restoreFile = document.getElementById('restorefile');
   document.getElementById('restore').addEventListener('click', function(){ restoreFile.click(); });

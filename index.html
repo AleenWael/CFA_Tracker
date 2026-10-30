@@ -473,25 +473,19 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
       'Yield-Based Bond Convexity and Portfolio Properties','Curve-Based and Empirical Risk Measures','Credit Risk',
       'Credit Analysis for Government Issuers','Credit Analysis for Corporate Issuers','Fixed-Income Securitization',
       'Asset-Backed Security (ABS) Features','Mortgage-Backed Security (MBS) Features']},
-    {key:'et',  code:'ET',  name:'Ethics', weight:'10–15%', mid:12.5, color:'#95509F', w:1.2, mods:[
-      'Ethics and Trust in the Investment Profession','Code of Ethics and Standards of Professional Conduct',
-      'Standard I: Professionalism','Standard II: Integrity of Capital Markets','Standard III: Duties to Clients',
-      'Standard IV: Duties to Employers','Standard V: Investment Analysis, Recommendations, and Actions',
-      'Standard VI: Conflicts of Interest','Standard VII: Responsibilities as Member or Candidate',
-      'Application of the Code and Standards: Level I']},
-    {key:'cf',  code:'CF',  name:'Corporate Finance', weight:'6–9%', mid:7.5, color:'#9C7526', w:0.8, mods:[
-      'Organizational Forms, Issuer Features, and Ownership','Investors and Other Stakeholders',
-      'Corporate Governance: Conflicts, Mechanisms, Risks, Benefits','Working Capital and Liquidity',
-      'Capital Investments and Capital Allocation','Capital Structure','Business Models']},
-    {key:'pc',  code:'PC',  name:'Portfolio Construction', weight:'8–12%', mid:10, color:'#B5574A', w:1, mods:[
-      'Portfolio Risk and Return: Part I','Portfolio Risk and Return: Part II','Portfolio Management: An Overview',
-      'Basics of Portfolio Planning and Construction','The Behavioral Biases of Individuals','Introduction to Risk Management']},
     {key:'de',  code:'DE',  name:'Derivatives & Risk Mgmt', weight:'6–9%', mid:7.5, color:'#5B7392', w:1.1, mods:[
       'Derivative Instrument and Market Features','Forward Commitment and Contingent Claim Features',
       'Derivative Benefits, Risks, Issuer and Investor Uses','Arbitrage, Replication, and the Cost of Carry',
       'Pricing and Valuation of Forward Contracts','Pricing and Valuation of Futures Contracts',
       'Pricing and Valuation of Interest Rate and Other Swaps','Pricing and Valuation of Options',
       'Option Replication Using Put–Call Parity','Valuing a Derivative Using a One-Period Binomial Model']},
+    {key:'pc',  code:'PC',  name:'Portfolio Construction', weight:'8–12%', mid:10, color:'#B5574A', w:1, mods:[
+      'Portfolio Risk and Return: Part I','Portfolio Risk and Return: Part II','Portfolio Management: An Overview',
+      'Basics of Portfolio Planning and Construction','The Behavioral Biases of Individuals','Introduction to Risk Management']},
+    {key:'cf',  code:'CF',  name:'Corporate Finance', weight:'6–9%', mid:7.5, color:'#9C7526', w:0.8, mods:[
+      'Organizational Forms, Issuer Features, and Ownership','Investors and Other Stakeholders',
+      'Corporate Governance: Conflicts, Mechanisms, Risks, Benefits','Working Capital and Liquidity',
+      'Capital Investments and Capital Allocation','Capital Structure','Business Models']},
     {key:'ai',  code:'AI',  name:'Alternative Investments', weight:'6–9%', mid:7.5, color:'#6273C4', w:0.75, mods:[
       'Alternative Investment Features, Methods, Structures','Alternative Investment Performance and Returns',
       'Investments in Private Capital: Equity and Debt','Real Estate and Infrastructure','Natural Resources',
@@ -499,6 +493,12 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
     {key:'ec',  code:'EC',  name:'Economics', weight:'6–9%', mid:7.5, color:'#7557B5', w:0.8, mods:[
       'The Firm and Market Structures','Understanding Business Cycles','Fiscal Policy','Monetary Policy',
       'Introduction to Geopolitics','International Trade','Capital Flows and the FX Market','Exchange Rate Calculations']},
+    {key:'et',  code:'ET',  name:'Ethics', weight:'10–15%', mid:12.5, color:'#95509F', w:1.2, mods:[
+      'Ethics and Trust in the Investment Profession','Code of Ethics and Standards of Professional Conduct',
+      'Standard I: Professionalism','Standard II: Integrity of Capital Markets','Standard III: Duties to Clients',
+      'Standard IV: Duties to Employers','Standard V: Investment Analysis, Recommendations, and Actions',
+      'Standard VI: Conflicts of Interest','Standard VII: Responsibilities as Member or Candidate',
+      'Application of the Code and Standards: Level I']},
     {key:'qm',  code:'QM',  name:'Quantitative Methods', weight:'11–14%', mid:12.5, color:'#2F5FA8', w:1.1, mods:[
       'Returns of Financial Assets and Instruments','Types of Financial Returns','Benchmarking Returns',
       'The Time Value of Money in Finance','Statistical Characteristics of Asset Returns',
@@ -524,14 +524,18 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
 
   // Revision: one entry per module, in study order (rv-1 revises the first
   // FSA module, and so on). Each has a CFA Institute and a Kaplan practice set.
-  var RV_REF = [], RV_OF = {};
-  TOPICS.forEach(function(t){
-    if(t.review) return;
-    t.mods.forEach(function(_, i){ RV_REF.push(t.key + '-' + (i + 1)); });
+  // The numbering is fixed to the order the entries were first created in, so
+  // reordering topics never changes which module an entry revises; entries
+  // are listed and scheduled in the current study order (see rvOrder()).
+  var RV_NUMBERING = ['fsa','eq','fi','et','cf','pc','de','ai','ec','qm'];
+  var RV_REF = [], RV_OF = {}, TOPIC_OF = {};
+  TOPICS.forEach(function(t){ TOPIC_OF[t.key] = t; });
+  RV_NUMBERING.forEach(function(key){
+    TOPIC_OF[key].mods.forEach(function(_, i){ RV_REF.push(key + '-' + (i + 1)); });
   });
   RV_REF.forEach(function(ref, i){ RV_OF[ref] = 'rv-' + (i + 1); });
   TOPICS.forEach(function(t){
-    if(t.revision) TOPICS.forEach(function(m){ if(!m.review) m.mods.forEach(function(title){ t.mods.push(title); }); });
+    if(t.revision) RV_REF.forEach(function(ref){ var r = ref.split('-'); t.mods.push(TOPIC_OF[r[0]].mods[+r[1] - 1]); });
   });
 
   // Rough study time, used for the "back on track" estimates (same numbers as
@@ -593,6 +597,13 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
     for(var i = 0; i < TOPICS.length; i++) if(TOPICS[i].key === key) return (i + 1) * 10000 + n * 10;
     return 999000 + n;
   }
+  // Sort position of a revision entry: the revision block, then the study
+  // order of the module it revises.
+  function rvOrder(ref){
+    var r = String(ref || '').split('-'), ti = -1;
+    for(var i = 0; i < TOPICS.length; i++) if(TOPICS[i].key === r[0]) ti = i;
+    return orderOf('rv', 0) + (ti + 1) * 200 + (+r[1] || 0);
+  }
   function seedDocs(){
     var docs = {};
     TOPICS.forEach(function(t){
@@ -600,7 +611,7 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
         var n = i + 1, id = t.key + '-' + n;
         var before = t.key === DONE_TOPIC;
         docs[id] = {
-          topic: t.key, num: n, title: title, order: orderOf(t.key, n), date: '',
+          topic: t.key, num: n, title: title, order: t.revision ? rvOrder(RV_REF[i]) : orderOf(t.key, n), date: '',
           skim: before, study: before, pq: before, pqScore: '', review: false, done: false,
           studyOn: '', pqOn: '', reviewOn: '', recall1On: '', recall2On: '',
           parts: before ? allParts(id) : {},
@@ -796,7 +807,12 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
   //  v7: FSA and Equities components follow Kaplan's module split, each with a
   //      quiz score. Studied modules get every new component ticked; ticks on
   //      unstudied ones are cleared (set to false: Firestore merges maps).
-  var PLAN_VERSION = 7;
+  //  v8: topics after Fixed Income reordered to Derivatives, Portfolio,
+  //      Corporate Finance, Alternatives, Economics, Ethics; their unstudied
+  //      modules are re-planned in that order over the same window, and the
+  //      revision entries follow the new order (weakest modules first).
+  var PLAN_VERSION = 8;
+  var V8_TOPICS = {de: 1, pc: 1, cf: 1, ai: 1, ec: 1, et: 1};
   var KAPLAN_RESET = {fsa: 1, eq: 1};
   function migrate(items, settings){
     var patches = {};
@@ -826,13 +842,29 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
       }
       if(from < 2 && c.topic === DONE_TOPIC && !c.study) set(id, {skim: true, study: true, pq: true, date: '', parts: allParts(id)});
       if(c.study && (!c.parts || !Object.keys(c.parts).length)) set(id, {parts: allParts(id)});
-      var o = orderOf(c.topic, c.num);
+      var o = c.topic === 'rv' ? rvOrder(c.ref || RV_REF[c.num - 1]) : orderOf(c.topic, c.num);
       if(c.order !== o) set(id, {order: o});
       var w = t0(c.topic) ? weightOf(c.topic, c.num) : null;
       if(w != null && c.weight !== w) set(id, {weight: w});
       var t = topicByKey[c.topic];
       if(from < 4 && t && t.review && !c.done && t.mods[c.num - 1] && c.title !== t.mods[c.num - 1]) set(id, {title: t.mods[c.num - 1]});
     });
+    if(from >= 4 && from < 8){
+      var later = Object.keys(items).filter(function(id){ return items[id] && V8_TOPICS[items[id].topic] && !items[id].study; })
+        .map(function(id){ return Object.assign({id: id}, items[id]); })
+        .sort(function(a, b){ return a.order - b.order; });
+      var starts = later.map(function(c){ return c.date; }).filter(Boolean).sort();
+      if(later.length){
+        var start = starts.length && starts[0] > todayISO() ? starts[0] : todayISO();
+        var d8 = plan(later, settings, start);
+        Object.keys(d8).forEach(function(id){ if(items[id].date !== d8[id]) set(id, {date: d8[id]}); });
+      }
+      // Revision follows the new study order too, weakest modules first.
+      var everything = Object.keys(items).filter(function(id){ return items[id]; })
+        .map(function(id){ return Object.assign({id: id}, items[id]); }).sort(function(a, b){ return a.order - b.order; });
+      var r8 = plan(everything, settings, todayISO());
+      Object.keys(r8).forEach(function(id){ if(items[id].topic === 'rv' && !items[id].done && items[id].date !== r8[id]) set(id, {date: r8[id]}); });
+    }
     if(from < 4){
       settings.buffer = DEFAULT_SETTINGS.buffer;
       var list = Object.keys(items).map(function(id){ return Object.assign({id: id}, items[id]); })

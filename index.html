@@ -1071,7 +1071,19 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
     var r = readiness(all);
     var mocks = all.filter(isMock).map(function(c){ return num(c.pqScore); }).filter(function(v){ return v != null; });
 
-    document.getElementById('rainbow').innerHTML = TOPICS.filter(function(t){ return !t.review; }).map(function(t){
+    // Finished topics first, in the order they were finished, then the rest in
+    // study order, so the bar fills from left to right.
+    var barTopics = TOPICS.filter(function(t){ return !t.review; }).map(function(t, i){
+      var chs = content.filter(function(c){ return c.topic === t.key; });
+      var done = chs.length && chs.every(complete);
+      var at = done ? chs.map(function(c){ return c.pqOn || c.studyOn || ''; }).sort().pop() : '';
+      return {t: t, done: done, at: at, i: i};
+    }).sort(function(a, b){
+      if(a.done !== b.done) return a.done ? -1 : 1;
+      if(a.done && a.at !== b.at) return a.at < b.at ? -1 : 1;
+      return a.i - b.i;
+    }).map(function(x){ return x.t; });
+    document.getElementById('rainbow').innerHTML = barTopics.map(function(t){
       var chs = content.filter(function(c){ return c.topic === t.key; });
       var p = chs.filter(complete).length / chs.length * 100;
       return '<div style="--tc:'+t.color+';flex:'+t.mid+'" title="'+esc(t.name)+' · '+t.weight+' · '+Math.round(p)+'% done"><i style="width:'+p+'%"></i></div>';

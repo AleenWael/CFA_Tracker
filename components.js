@@ -1,6 +1,7 @@
 // Component (sub-topic) breakdown of every learning module, keyed by module id.
 // Each component is ticked off, with its quiz score, as it is studied.
-// FSA and Equities follow Kaplan Schweser's module split (Readings 27–50),
+// FSA, Equities, Fixed Income and Derivatives follow Kaplan Schweser's module
+// split (Readings 27–79),
 // so each component has its own Kaplan module quiz; the other topics are
 // best-guess section lists until they are matched to Kaplan too.
 // Ticks and quiz scores are stored by position: when a list changes, the
@@ -64,26 +65,26 @@ window.CFA_COMPONENTS = {
   'eq-11': ['49.1 Equity Analyst Research Reports'],
   'eq-12': ['50.1 Estimating the Cost of Equity With the Market Model and CAPM','50.2 Arbitrage Pricing Theory'],
 
-  // ---------- Fixed Income ----------
-  'fi-1': ['Bond features: issuer, maturity, par, coupon, currency','Bond indenture and covenants','Seniority and collateral','Legal, regulatory and tax considerations'],
-  'fi-2': ['Principal repayment structures','Coupon structures (floating, step-up, PIK, index-linked)','Contingency provisions: callable, putable, convertible','Contingent convertible bonds'],
-  'fi-3': ['Market segments and classification','Primary markets: public offerings, private placements','Secondary markets and liquidity','Fixed-income indexes and investors'],
-  'fi-4': ['Short-term funding: commercial paper, bank loans','Repurchase agreements','Corporate debt profiles and maturities','Long-term corporate bonds and MTNs'],
-  'fi-5': ['Sovereign debt: types and auctions','On-the-run vs off-the-run and benchmark yields','Non-sovereign, agency and supranational issuers'],
-  'fi-6': ['Pricing with a market discount rate','Price–yield relationships','Pricing with spot rates','Flat price, accrued interest and full price','Matrix pricing'],
-  'fi-7': ['Periodicity and annual-equivalent yields','Street convention, true and current yield','Yield-to-call and yield-to-worst','Option-adjusted yield','G-spread, I-spread and Z-spread'],
-  'fi-8': ['Quoted margin and discount margin','Floating-rate note valuation','Money market yields: discount vs add-on','Bond-equivalent yield'],
-  'fi-9': ['Spot rates','Par rates','Forward rates and implied forwards','Relationships among spot, par and forward curves','Yield curve shapes'],
-  'fi-10': ['Sources of return: coupons, reinvestment, capital gains','Investment horizon and interest rate risk','Macaulay duration and horizon matching'],
-  'fi-11': ['Macaulay and modified duration','Approximate modified duration','Money duration and PVBP','Properties of duration','Effective duration'],
-  'fi-12': ['Convexity and approximate convexity','Price change with duration and convexity','Money convexity','Portfolio duration and convexity'],
-  'fi-13': ['Effective duration and convexity for bonds with options','Key rate duration','Empirical duration','Credit spread sensitivity'],
-  'fi-14': ['Probability of default and loss given default','Expected loss','Credit ratings and rating agencies','Credit spreads and spread risk','Four Cs of credit analysis'],
-  'fi-15': ['Sovereign credit: institutional and economic factors','Fiscal and monetary flexibility','External status','Non-sovereign government debt'],
-  'fi-16': ['Corporate credit analysis (four Cs)','Leverage and coverage ratios','Seniority ranking and recovery rates','Notching','Covenants'],
-  'fi-17': ['Benefits of securitization','Securitization process and parties','SPV and bankruptcy remoteness','Credit tranching and time tranching','Covered bonds'],
-  'fi-18': ['ABS structure and credit enhancement','Credit card receivable ABS','Auto loan ABS','CDOs and CLOs'],
-  'fi-19': ['Residential mortgage loans','Prepayment risk: contraction and extension','Mortgage pass-through securities','CMOs: sequential, PAC and support tranches','Commercial MBS'],
+  // ---------- Fixed Income (Kaplan Readings 51–69) ----------
+  'fi-1': ['51.1 Fixed-Income Instrument Features'],
+  'fi-2': ['52.1 Fixed-Income Cash Flows and Types'],
+  'fi-3': ['53.1 Fixed-Income Issuance and Trading'],
+  'fi-4': ['54.1 Fixed-Income Markets for Corporate Issuers'],
+  'fi-5': ['55.1 Fixed-Income Markets for Government Issuers'],
+  'fi-6': ['56.1 Fixed-Income Bond Valuation: Prices and Yields'],
+  'fi-7': ['57.1 Yield and Yield Spread Measures for Fixed-Rate Bonds'],
+  'fi-8': ['58.1 Yield and Yield Spread Measures for Floating-Rate Instruments'],
+  'fi-9': ['59.1 The Term Structure of Interest Rates: Spot, Par, and Forward Curves'],
+  'fi-10': ['60.1 Interest Rate Risk and Return'],
+  'fi-11': ['61.1 Yield-Based Bond Duration Measures and Properties'],
+  'fi-12': ['62.1 Yield-Based Bond Convexity and Portfolio Properties'],
+  'fi-13': ['63.1 Curve-Based and Empirical Fixed-Income Risk Measures'],
+  'fi-14': ['64.1 Credit Risk'],
+  'fi-15': ['65.1 Credit Analysis for Government Issuers'],
+  'fi-16': ['66.1 Credit Analysis for Corporate Issuers'],
+  'fi-17': ['67.1 Fixed-Income Securitization'],
+  'fi-18': ['68.1 Asset-Backed Security (ABS) Instrument and Market Features'],
+  'fi-19': ['69.1 Mortgage-Backed Security (MBS) Instrument and Market Features'],
 
   // ---------- Alternative Investments ----------
   'ai-1': ['Characteristics of alternative investments','Direct, co-investing and fund investing','Partnership structures (GP/LP)','Fees: management, incentive, hurdle, high-water mark, clawback'],
@@ -104,17 +105,17 @@ window.CFA_COMPONENTS = {
   'ec-7': ['Capital restrictions','FX market participants','Exchange rate regimes','Exchange rates and the trade balance'],
   'ec-8': ['Spot quotes: direct vs indirect','Cross rates','Forward rates and covered interest parity','Forward points and premium/discount','Percentage changes in currency values'],
 
-  // ---------- Derivatives ----------
-  'de-1': ['What derivatives are and their underlyings','Exchange-traded vs OTC derivatives','Central clearing','Market participants'],
-  'de-2': ['Forwards','Futures: margin and mark-to-market','Swaps','Options: calls, puts and payoffs','Credit derivatives (CDS)'],
-  'de-3': ['Benefits of derivatives','Risks: leverage, counterparty, basis, liquidity','Issuer uses and hedge accounting','Investor uses'],
-  'de-4': ['Arbitrage and the law of one price','Replication','Cost of carry: costs and benefits','Forward price with carry'],
-  'de-5': ['Pricing vs valuation at initiation','Value during the life and at expiry','Forward rate agreements (FRAs)','Implied forward rates'],
-  'de-6': ['Futures vs forward pricing','Mark-to-market and interest rate correlation','Interest rate futures','Basis'],
-  'de-7': ['Swaps as a series of forwards','Pricing: the swap rate','Valuation after initiation'],
-  'de-8': ['Exercise value, moneyness and time value','Factors affecting option value','Lower and upper bounds','American vs European options'],
-  'de-9': ['Put–call parity','Synthetic positions, protective puts and covered calls','Put–call–forward parity','Firm value as an option'],
-  'de-10': ['One-period binomial model','Risk-neutral probabilities','Hedge ratio and replicating portfolio','Arbitrage when mispriced'],
+  // ---------- Derivatives (Kaplan Readings 70–79) ----------
+  'de-1': ['70.1 Derivatives Markets'],
+  'de-2': ['71.1 Forwards and Futures','71.2 Swaps and Options'],
+  'de-3': ['72.1 Uses, Benefits, and Risks of Derivatives'],
+  'de-4': ['73.1 Arbitrage, Replication, and Carrying Costs'],
+  'de-5': ['74.1 Forward Contract Valuation'],
+  'de-6': ['75.1 Futures Valuation'],
+  'de-7': ['76.1 Swap Valuation'],
+  'de-8': ['77.1 Option Valuation'],
+  'de-9': ['78.1 Put-Call Parity'],
+  'de-10': ['79.1 Binomial Model for Option Values'],
 
   // ---------- Ethics ----------
   'et-1': ['Ethics and ethical decision-making','Professions and professionalism','Trust in the investment industry','Ethical vs legal standards','Challenges to ethical behavior'],

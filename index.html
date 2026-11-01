@@ -467,18 +467,18 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
     {key:'fi',  code:'FI',  name:'Fixed Income', weight:'11–14%', mid:12.5, color:'#2A7E89', w:1.25, mods:[
       'Fixed-Income Instrument Features','Fixed-Income Cash Flows and Types','Fixed-Income Issuance and Trading',
       'Fixed-Income Markets for Corporate Issuers','Fixed-Income Markets for Government Issuers',
-      'Bond Valuation: Prices and Yields','Yield and Yield Spread Measures for Fixed-Rate Bonds',
-      'Yield and Yield Spread Measures for Floating-Rate Instruments','Term Structure: Spot, Par, and Forward Curves',
+      'Fixed-Income Bond Valuation: Prices and Yields','Yield and Yield Spread Measures for Fixed-Rate Bonds',
+      'Yield and Yield Spread Measures for Floating-Rate Instruments','The Term Structure of Interest Rates: Spot, Par, and Forward Curves',
       'Interest Rate Risk and Return','Yield-Based Bond Duration Measures and Properties',
-      'Yield-Based Bond Convexity and Portfolio Properties','Curve-Based and Empirical Risk Measures','Credit Risk',
+      'Yield-Based Bond Convexity and Portfolio Properties','Curve-Based and Empirical Fixed-Income Risk Measures','Credit Risk',
       'Credit Analysis for Government Issuers','Credit Analysis for Corporate Issuers','Fixed-Income Securitization',
-      'Asset-Backed Security (ABS) Features','Mortgage-Backed Security (MBS) Features']},
+      'Asset-Backed Security (ABS) Instrument and Market Features','Mortgage-Backed Security (MBS) Instrument and Market Features']},
     {key:'de',  code:'DE',  name:'Derivatives & Risk Mgmt', weight:'6–9%', mid:7.5, color:'#5B7392', w:1.1, mods:[
-      'Derivative Instrument and Market Features','Forward Commitment and Contingent Claim Features',
-      'Derivative Benefits, Risks, Issuer and Investor Uses','Arbitrage, Replication, and the Cost of Carry',
-      'Pricing and Valuation of Forward Contracts','Pricing and Valuation of Futures Contracts',
-      'Pricing and Valuation of Interest Rate and Other Swaps','Pricing and Valuation of Options',
-      'Option Replication Using Put–Call Parity','Valuing a Derivative Using a One-Period Binomial Model']},
+      'Derivative Instrument and Derivative Market Features','Forward Commitment and Contingent Claim Features and Instruments',
+      'Derivative Benefits, Risks, and Issuer and Investor Uses','Arbitrage, Replication, and the Cost of Carry in Pricing Derivatives',
+      'Pricing and Valuation of Forward Contracts and for an Underlying with Varying Maturities','Pricing and Valuation of Futures Contracts',
+      'Pricing and Valuation of Interest Rates and Other Swaps','Pricing and Valuation of Options',
+      'Option Replication Using Put-Call Parity','Valuing a Derivative Using a One-Period Binomial Model']},
     {key:'pc',  code:'PC',  name:'Portfolio Construction', weight:'8–12%', mid:10, color:'#B5574A', w:1, mods:[
       'Portfolio Risk and Return: Part I','Portfolio Risk and Return: Part II','Portfolio Management: An Overview',
       'Basics of Portfolio Planning and Construction','The Behavioral Biases of Individuals','Introduction to Risk Management']},
@@ -811,7 +811,12 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
   //      Corporate Finance, Alternatives, Economics, Ethics; their unstudied
   //      modules are re-planned in that order over the same window, and the
   //      revision entries follow the new order (weakest modules first).
-  var PLAN_VERSION = 8;
+  //  v9: Fixed Income and Derivatives follow Kaplan's module split (reading
+  //      names and components); default reading names are renamed, and
+  //      component ticks reset like v7.
+  var PLAN_VERSION = 9;
+  var V9_RENAME = {"fi-6": ["Bond Valuation: Prices and Yields", "Fixed-Income Bond Valuation: Prices and Yields"], "fi-9": ["Term Structure: Spot, Par, and Forward Curves", "The Term Structure of Interest Rates: Spot, Par, and Forward Curves"], "fi-13": ["Curve-Based and Empirical Risk Measures", "Curve-Based and Empirical Fixed-Income Risk Measures"], "fi-18": ["Asset-Backed Security (ABS) Features", "Asset-Backed Security (ABS) Instrument and Market Features"], "fi-19": ["Mortgage-Backed Security (MBS) Features", "Mortgage-Backed Security (MBS) Instrument and Market Features"], "de-1": ["Derivative Instrument and Market Features", "Derivative Instrument and Derivative Market Features"], "de-2": ["Forward Commitment and Contingent Claim Features", "Forward Commitment and Contingent Claim Features and Instruments"], "de-3": ["Derivative Benefits, Risks, Issuer and Investor Uses", "Derivative Benefits, Risks, and Issuer and Investor Uses"], "de-4": ["Arbitrage, Replication, and the Cost of Carry", "Arbitrage, Replication, and the Cost of Carry in Pricing Derivatives"], "de-5": ["Pricing and Valuation of Forward Contracts", "Pricing and Valuation of Forward Contracts and for an Underlying with Varying Maturities"], "de-7": ["Pricing and Valuation of Interest Rate and Other Swaps", "Pricing and Valuation of Interest Rates and Other Swaps"], "de-9": ["Option Replication Using Put–Call Parity", "Option Replication Using Put-Call Parity"]};
+  var KAPLAN_RESET_V9 = {fi: 1, de: 1};
   var V8_TOPICS = {de: 1, pc: 1, cf: 1, ai: 1, ec: 1, et: 1};
   var KAPLAN_RESET = {fsa: 1, eq: 1};
   function migrate(items, settings){
@@ -822,6 +827,18 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
     function set(id, p){ Object.assign(items[id], p); patches[id] = Object.assign(patches[id] || {}, p); }
     Object.keys(items).forEach(function(id){
       var c = items[id];
+      if(from < 9){
+        var ren = V9_RENAME[c.topic === 'rv' ? (c.ref || '') : id];
+        if(ren && c.title === ren[0]) set(id, {title: ren[1]});
+        if(KAPLAN_RESET_V9[c.topic]){
+          if(c.study) set(id, {parts: allParts(id)});
+          else if(c.parts && Object.keys(c.parts).length){
+            var off9 = {};
+            Object.keys(c.parts).forEach(function(k){ off9[k] = false; });
+            set(id, {parts: off9});
+          }
+        }
+      }
       if(from < 7 && KAPLAN_RESET[c.topic]){
         if(c.study) set(id, {parts: allParts(id)});
         else if(c.parts && Object.keys(c.parts).length){

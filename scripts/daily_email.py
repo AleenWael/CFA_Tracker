@@ -109,6 +109,19 @@ def load_components():
     return out
 
 
+def load_videos():
+    """AnalystPrep YouTube lesson per module, from videos.js ({id: {id, title, dur}})."""
+    path = Path(__file__).resolve().parent.parent / "videos.js"
+    if not path.exists():
+        return {}
+    text = path.read_text(encoding="utf-8")
+    m = re.search(r"window\.CFA_VIDEOS\s*=\s*(\{.*\})\s*;", text, re.S)
+    return json.loads(m.group(1)) if m else {}
+
+
+VIDEOS = load_videos()
+
+
 # ---------- building the email ----------
 def add_days(day, n):
     return (dt.date.fromisoformat(day) + dt.timedelta(days=n)).isoformat()
@@ -258,9 +271,13 @@ def build(docs, comps, today):
         done_n = sum(1 for i in range(len(names)) if (c.get("parts") or {}).get(str(i)))
         meta = " · ".join(x for x in [note, f"{done_n}/{len(names)} components done" if names else "",
                                        f"≈ {fmt_min(mins[c['id']])} left"] if x)
-        text.append(f"- {code} {n} {title} ({meta})")
+        ref = c.get("ref") if c.get("topic") == "rv" else c["id"]
+        vid = VIDEOS.get(ref or "")
+        watch = f"https://www.youtube.com/watch?v={vid['id']}" if vid else ""
+        text.append(f"- {code} {n} {title} ({meta})" + (f"\n    Video: {watch}" if watch else ""))
         html.append(f'<div style="margin:0 0 14px">{chip(c)} <b>{escape(title)}</b>'
-                    f'<div style="color:{grey};font-size:12.5px;margin:3px 0 0">{escape(meta)}</div>')
+                    + (f' <a href="{watch}" style="color:#C4302B;font-weight:600;text-decoration:none;font-size:13px">▶ Watch</a>' if watch else '')
+                    + f'<div style="color:{grey};font-size:12.5px;margin:3px 0 0">{escape(meta)}</div>')
         steps = left[c["id"]]
         if steps:
             html.append('<table style="border-collapse:collapse;margin:6px 0 0 4px;font-size:13.5px">')

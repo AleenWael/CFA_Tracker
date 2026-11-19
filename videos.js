@@ -1,9 +1,11 @@
-// AnalystPrep's YouTube lesson for each module (latest upload whose title is
-// that module), keyed by module id. A list holds one lesson or its parts in
-// order. Modules not listed have no AnalystPrep video yet (mostly the 2027
-// rewrites); the tracker links them to a search of AnalystPrep's channel.
+// AnalystPrep's YouTube lesson(s) for each module, keyed by module id: the
+// latest upload titled as the module, or, where the module was renamed or
+// regrouped in the 2027 curriculum, AnalystPrep's lesson from the earlier
+// curriculum that covers it ("label" holds that lesson's name). A list holds
+// one lesson, its parts, or the older lessons that together cover a module.
 // "note" marks a lesson from another level (ethics standards are the same).
-// Found with YouTube search on 2026-11-19.
+// Modules not listed have no AnalystPrep video found; the tracker links them
+// to a search of AnalystPrep's channel. Found with YouTube on 2026-11-19.
 window.CFA_VIDEOS = {
   "fsa-1": [{"id": "rtQob6hl-TM", "title": "Introduction to Financial Statement Analysis (2025 CFA® Level I Exam – FSA – Learning Module 1)", "dur": "1:00:07"}],
   "fsa-2": [{"id": "N817A4vtUeE", "title": "Analyzing Income Statements (2025 CFA® Level I Exam – FSA – Learning Module 2)", "dur": "1:08:46"}],
@@ -17,10 +19,17 @@ window.CFA_VIDEOS = {
   "fsa-10": [{"id": "9gBd_FSN4R4", "title": "Financial Reporting Quality (2025 Level I CFA® Exam – FRA – Module 11)", "dur": "34:10"}],
   "fsa-11": [{"id": "g2wEFJ7upNs", "title": "Financial Analysis Techniques (2025 Level I CFA® Exam – FRA– L.M 11)", "dur": "51:25"}],
   "fsa-12": [{"id": "IUrehRQfQO0", "title": "Introduction to Financial Statement Modeling (2025 CFA® Level I Exam – FSA – Learning Module 12)", "dur": "1:17:10"}],
+  "eq-3": [{"id": "LFJYcV5EL-w", "title": "Market Organization and Structure (2025 Level I CFA® Exam – Equity – Module 1)", "dur": "57:37", "label": "Market Organization and Structure"}],
+  "eq-8": [{"id": "__uvulr_AOA", "title": "Company Analysis Forecasting (2025 CFA® Level I Exam – Equity – Learning Module 7)", "dur": "32:22", "label": "Company Analysis: Forecasting"}],
   "fi-1": [{"id": "EcocwuHG4mM", "title": "Fixed Income Instrument Features (2025 CFA® Level I Exam – Fixed Income – Learning Module 1)", "dur": "29:14"}],
   "fi-2": [{"id": "82mq6T67vKs", "title": "Fixed Income Cash Flows and Types (2025 CFA® Level I Exam – Fixed Income – Learning Module 2)", "dur": "22:12"}],
   "fi-3": [{"id": "yIft_KvyRlg", "title": "Fixed Income Issuance and Trading (2025 CFA® Level I Exam – Fixed Income – Learning Module 3)", "dur": "28:13"}],
+  "fi-4": [{"id": "l7RAt_PtF9g", "title": "Fixed-Income Markets: Issuance, Trading and Funding (2025 Level I CFA® Exam – Fixed Income–Module 2)", "dur": "48:16", "label": "Fixed-Income Markets: Issuance, Trading and Funding"}],
+  "fi-5": [{"id": "l7RAt_PtF9g", "title": "Fixed-Income Markets: Issuance, Trading and Funding (2025 Level I CFA® Exam – Fixed Income–Module 2)", "dur": "48:16", "label": "Fixed-Income Markets: Issuance, Trading and Funding"}],
+  "fi-6": [{"id": "TUfpZZ9tBf0", "title": "Introduction to Fixed-Income Valuation (2021 Level I CFA® Exam – Reading 44)", "dur": "28:36", "label": "Introduction to Fixed-Income Valuation"}],
   "fi-7": [{"id": "6WnUcWArSxE", "title": "Yield and Yield Spread Measures for Fixed Rate Bonds (2025 CFA® Level I – Fixed Income – LM 7)", "dur": "28:21"}],
+  "fi-8": [{"id": "TUfpZZ9tBf0", "title": "Introduction to Fixed-Income Valuation (2021 Level I CFA® Exam – Reading 44)", "dur": "28:36", "label": "Introduction to Fixed-Income Valuation"}],
+  "fi-9": [{"id": "TUfpZZ9tBf0", "title": "Introduction to Fixed-Income Valuation (2021 Level I CFA® Exam – Reading 44)", "dur": "28:36", "label": "Introduction to Fixed-Income Valuation"}],
   "fi-10": [{"id": "NMlnM5vQGh8", "title": "Interest Rate Risk and Return (2025 CFA® Level I Exam – Fixed Income – Learning Module 10)", "dur": "35:43"}],
   "fi-11": [{"id": "0FIG6azO9Do", "title": "Yield-Based Bond Duration Measures and Properties (2025 CFA® Ll I Exam – Fixed Income – LM 11)", "dur": "18:04"}],
   "fi-12": [{"id": "uihWJaKROXc", "title": "Yield-Based Bond Convexity and Portfolio Properties (2025 CFA® L l  Exam – Fixed Income – LM 12)", "dur": "29:45"}],
@@ -31,18 +40,29 @@ window.CFA_VIDEOS = {
   "de-1": [{"id": "Kg70XKMoCz8", "title": "Derivative Instrument and Derivative Market Features (2025 LI CFA® Exam – Derivatives Module 1)", "dur": "26:21"}],
   "de-2": [{"id": "6DFia-h-aI8", "title": "Forward Commitment and Contingent Claim Features And Instruments (2025 LI CFA®–Derivatives M2)", "dur": "55:36"}],
   "de-3": [{"id": "5Avzrkirq4g", "title": "Derivative Benefits, Risks, and Issuer and Investor Uses (2025 LI CFA® Exam – Derivatives M3)", "dur": "24:34"}],
+  "de-4": [{"id": "0Geaej45v7w", "title": "Basics of Derivative Pricing and Valuation (2025 Level I CFA® Exam – Derivative – Module 2)", "dur": "1:08:28", "label": "Basics of Derivative Pricing and Valuation"}],
+  "de-5": [{"id": "0Geaej45v7w", "title": "Basics of Derivative Pricing and Valuation (2025 Level I CFA® Exam – Derivative – Module 2)", "dur": "1:08:28", "label": "Basics of Derivative Pricing and Valuation"}],
+  "de-6": [{"id": "0Geaej45v7w", "title": "Basics of Derivative Pricing and Valuation (2025 Level I CFA® Exam – Derivative – Module 2)", "dur": "1:08:28", "label": "Basics of Derivative Pricing and Valuation"}],
   "de-7": [{"id": "4BtaPfEd2Ao", "title": "Pricing and Valuation of Interest Rates and Other Swaps (2025 LI CFA® Exam – Derivatives – M7)", "dur": "28:51"}],
+  "de-8": [{"id": "0Geaej45v7w", "title": "Basics of Derivative Pricing and Valuation (2025 Level I CFA® Exam – Derivative – Module 2)", "dur": "1:08:28", "label": "Basics of Derivative Pricing and Valuation"}],
   "de-9": [{"id": "Dvq2OTfQLSM", "title": "Option Replication Using Put-Call Parity (2025 Level I CFA® Exam – Derivatives – Module 9)", "dur": "38:47"}],
+  "de-10": [{"id": "0Geaej45v7w", "title": "Basics of Derivative Pricing and Valuation (2025 Level I CFA® Exam – Derivative – Module 2)", "dur": "1:08:28", "label": "Basics of Derivative Pricing and Valuation"}],
   "pc-1": [{"id": "DLKhsZvcD-c", "title": "Portfolio Risk and Return - Part I (2025 Level I CFA® Exam – PM – Module 1)", "dur": "55:39"}],
   "pc-2": [{"id": "OCZddCJ_HwM", "title": "Portfolio Risk and Return – Part II (2025 Level I CFA® Exam – PM – Module 2)", "dur": "54:59"}],
   "pc-3": [{"id": "ILj5hT_N3TU", "title": "Portfolio Management: An Overview (2025 Level I CFA® Exam – PM – Module 1)", "dur": "50:55"}],
+  "pc-4": [{"id": "hh4LeaTMl5Q", "title": "Basics of Portfolio Planning and Construction (2025 Level I CFA® Exam – PM – Module 4)", "dur": "48:56"}],
   "cf-1": [{"id": "SRcCsC7jOgg", "title": "Organization Forms, Corporate Issuer Features, and Ownership (2024 CFA® Level I Exam – CI – LM1)", "dur": "47:37"}],
   "cf-2": [{"id": "P7XfZbphYJY", "title": "Investors and Other Stakeholders (2025 CFA® Level I Exam – Corporate Issuers – LM2)", "dur": "54:22"}],
+  "cf-3": [{"id": "535QsiUC1UU", "title": "Introduction to Corporate Governance and Other ESG Considerations (2025 Level I CFA® Exam – Module2)", "dur": "1:08:49", "label": "Introduction to Corporate Governance and Other ESG Considerations"}],
   "cf-4": [{"id": "TxF8J3o9QSk", "title": "Working Capital and Liquidity (2024 CFA® Level I Exam – Corporate Issuers – Learning Module 4)", "dur": "46:22"}],
+  "cf-5": [{"id": "cvYoPNbcmfA", "title": "Uses of Capital (2022 CFA® Level I Reading 28 – Corporate Issuers)", "dur": "52:57", "label": "Uses of Capital"}],
   "cf-6": [{"id": "Un8dX7RGxIg", "title": "Capital Structure (2025 CFA® Level I Exam – Corporate Issuers – Learning Module 6)", "dur": "1:12:42"}],
   "cf-7": [{"id": "yfuXrDA0Qs8", "title": "Business Models (2025 CFA® Level I Exam – Corporate Issuers – Learning Module 6)", "dur": "31:37"}],
   "ai-1": [{"id": "q7iIl51QEG0", "title": "Alternative Investment Features, Methods, and Structures (2025 CFA® Level I Exam – AI – LM 1)", "dur": "29:42"}],
+  "ai-2": [{"id": "nIfgMic9cdM", "title": "Introduction To Alternative Investments (2022 CFA® Level I Reading 47 – Alternative Investments)", "dur": "38:14", "label": "Introduction to Alternative Investments"}],
   "ai-3": [{"id": "toTD31LVdjI", "title": "Investments in Private Capital Equity and Debt (2025 CFA® LI Exam – Alternative Inv. – LM 3)", "dur": "34:45"}],
+  "ai-4": [{"id": "nIfgMic9cdM", "title": "Introduction To Alternative Investments (2022 CFA® Level I Reading 47 – Alternative Investments)", "dur": "38:14", "label": "Introduction to Alternative Investments"}],
+  "ai-5": [{"id": "nIfgMic9cdM", "title": "Introduction To Alternative Investments (2022 CFA® Level I Reading 47 – Alternative Investments)", "dur": "38:14", "label": "Introduction to Alternative Investments"}],
   "ai-6": [{"id": "-4D6b9PEsnw", "title": "Hedge Funds (2025 CFA® Level I Exam – Alternative Investments – Learning Module 6)", "dur": "47:41"}],
   "ai-7": [{"id": "XG7UkdSJVxg", "title": "Introduction to Digital Assets (2025 CFA® Level I Exam – Alternative Investments – LM 7)", "dur": "48:22"}],
   "ec-1": [{"id": "V0465rIveto", "title": "The Firm and Market Structures (2024/2025 CFA® Level I Exam – Economics – Learning Module 1)", "dur": "42:40"}],
@@ -64,5 +84,9 @@ window.CFA_VIDEOS = {
   "qm-2": [{"id": "C1K5tMQNcb4", "title": "Types of Financial Return (2027 CFA® Level I Exam – QM –  Module 2)", "dur": "33:59"}],
   "qm-4": [{"id": "q19fXutv7zc", "title": "The Time Value of Money in Finance – Part I (2025 CFA® Level I Exam – QM – Module 2)", "dur": "1:05:16"}, {"id": "Y49S_XFLP04", "title": "The Time Value of Money in Finance – Part II (2025 CFA® Level I Exam – QM – Module 2)", "dur": "37:38"}],
   "qm-5": [{"id": "HqEeW0jihS8", "title": "Statistical Characteristics of Asset Returns(2027 CFA® Level I Exam – QM –  Module 5)", "dur": "56:20"}],
+  "qm-6": [{"id": "TXO9ODcLWiU", "title": "Common Probability Distributions (2025 Level I CFA® Exam – Quantitative Methods –  Module 4)", "dur": "1:00:48", "label": "Common Probability Distributions"}],
+  "qm-7": [{"id": "QDmc4Pa92bs", "title": "Sampling and Estimation (2025 Level I CFA® Exam – Quantitative Methods –  Module 5)", "dur": "37:41", "label": "Sampling and Estimation"}, {"id": "qwiEHnEXmz8", "title": "Hypothesis Testing (2025 CFA® Level I Exam – Quantitative Methods – Learning Module 8)", "dur": "54:37", "label": "Hypothesis Testing"}],
+  "qm-8": [{"id": "Ciu1kP6q9d0", "title": "Probability Trees and Conditional Expectations (2025 CFA® Level I Exam – QM – Module 4)", "dur": "33:32", "label": "Probability Trees and Conditional Expectations"}],
+  "qm-9": [{"id": "bOVUZ4ujUS4", "title": "Simulation Methods (2025 CFA® Level I Exam – Quantitative Methods – Learning Module 6)", "dur": "37:12", "label": "Simulation Methods"}],
   "qm-10": [{"id": "f_bfHxCFdLk", "title": "Simple Linear Regression – Part I (2025 CFA® Level I Exam – Quantitative Methods – LM 10)", "dur": "54:49"}, {"id": "FmVBqrMYreM", "title": "Simple Linear Regression – Part II (2025 CFA® Level I Exam – Quantitative Methods – LM 10)", "dur": "49:59"}]
 };

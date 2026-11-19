@@ -275,7 +275,7 @@ def build(docs, comps, today):
         vids = VIDEOS.get(ref or "") or []
         if isinstance(vids, dict):
             vids = [vids]
-        links = [(("▶ Watch" if len(vids) == 1 else f"▶ Part {i + 1}"), f"https://www.youtube.com/watch?v={v['id']}") for i, v in enumerate(vids)]
+        links = [("▶ " + (v.get("label") or ("Watch" if len(vids) == 1 else f"Part {i + 1}")), f"https://www.youtube.com/watch?v={v['id']}") for i, v in enumerate(vids)]
         text.append(f"- {code} {n} {title} ({meta})" + "".join(f"\n    {lbl[2:]}: {url}" for lbl, url in links))
         html.append(f'<div style="margin:0 0 14px">{chip(c)} <b>{escape(title)}</b>'
                     + "".join(f' <a href="{url}" style="color:#C4302B;font-weight:600;text-decoration:none;font-size:13px">{lbl}</a>' for lbl, url in links)

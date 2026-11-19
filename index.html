@@ -180,6 +180,10 @@ details.method a{color:var(--accent);}
 .ch .partlist li.on .pcb{background:var(--tc);border-color:var(--tc);}
 .ch .meta{grid-column:2/-1;font-size:11.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;}
 .ch .meta .ok{color:var(--good);}
+.vlink{color:#C4302B;text-decoration:none;font-weight:600;white-space:nowrap;}
+.vlink:hover{text-decoration:underline;}
+.vlink.none{color:var(--faint);font-weight:500;}
+.today .vlink{font-size:12px;margin-left:4px;}
 .ch .meta:empty{display:none;}
 
 .cb{justify-self:center;width:22px;height:22px;border-radius:6px;border:2px solid var(--line-strong);background:transparent;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;line-height:1;}
@@ -444,6 +448,7 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="components.js"></script>
+<script src="videos.js"></script>
 <script>
 (function(){
   "use strict";
@@ -556,6 +561,20 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
   function saveOpenParts(){ try { localStorage.setItem('aleen-cfa-2027-parts-open', JSON.stringify(openParts)); } catch(e){} }
   function isRev(c){ return topicByKey[c.topic] && topicByKey[c.topic].review; }
   function isMock(c){ return isRev(c) && /^Mock exam/i.test(c.title); }
+  // AnalystPrep's YouTube lesson for a module (videos.js). Modules without one
+  // link to a search of AnalystPrep's channel instead.
+  var VIDEOS = window.CFA_VIDEOS || {};
+  // An entry is a list of videos: one lesson, or its parts in order.
+  function videoLink(id, title, short){
+    var vs = VIDEOS[id];
+    if(vs && !Array.isArray(vs)) vs = [vs];
+    if(vs && vs.length) return vs.map(function(v, i){
+      var label = (vs.length > 1 ? 'Part ' + (i + 1) : (short ? 'Video' : 'AnalystPrep video')) + (v.note && !short ? ' (' + v.note + ')' : '');
+      return '<a class="vlink" href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'" target="_blank" rel="noopener" title="'+esc(v.title)+'">▶ '+label+(v.dur && !short ? ' · '+esc(v.dur) : '')+'</a>';
+    }).join(' ');
+    if(short || !title) return '';
+    return '<a class="vlink none" href="https://www.youtube.com/@AnalystPrep/search?query='+encodeURIComponent(title)+'" target="_blank" rel="noopener" title="No AnalystPrep video found for this module: search their channel">▶ Search AnalystPrep</a>';
+  }
   function isRevision(c){ return c.topic === 'rv'; }
   function refOf(c){ return isRevision(c) ? (c.ref || RV_REF[c.num - 1]) : c.id; }
   // Code, number and colour shown for an item; revision entries show the module they revise.
@@ -1109,7 +1128,7 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
     // ---- today ----
     var li = function(c, cls, tag, btn){
       var tg = tagOf(c);
-      return '<li class="'+cls+'"><span class="tag">'+esc(tag)+'</span><span><b class="tcode" style="background:'+tg.color+'">'+(isRevision(c)?'↻ ':'')+tg.code+' '+tg.num+'</b> '+esc((isRevision(c)?'Revise + CFAI & Kaplan sets: ':'')+c.title)+'</span>' +
+      return '<li class="'+cls+'"><span class="tag">'+esc(tag)+'</span><span><b class="tcode" style="background:'+tg.color+'">'+(isRevision(c)?'↻ ':'')+tg.code+' '+tg.num+'</b> '+esc((isRevision(c)?'Revise + CFAI & Kaplan sets: ':'')+c.title)+(isRev(c) && !isRevision(c) ? '' : ' '+videoLink(refOf(c), c.title, true))+'</span>' +
         (btn ? '<button class="go" data-go="'+btn+'" data-id="'+c.id+'">'+(btn==='study'?'Studied':btn==='done'?'Done':'✓ Recalled')+'</button>' : '') + '</li>';
     };
     var due = all.filter(function(c){ return !studied(c) && c.date && c.date <= today; });
@@ -1371,7 +1390,7 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
     if(c.done) cls += ' complete';
     if(!c.done && c.date === today) cls += ' is-today';
     if(!c.done && c.date && c.date < today) cls += ' is-late';
-    var bits = [];
+    var bits = [videoLink(refOf(c), c.title)];
     if(c.doneOn) bits.push('<span class="ok">Revised ' + pretty(c.doneOn) + '</span>');
     return '<div class="'+cls+'" data-id="'+c.id+'" style="--tc:'+tg.color+'">' +
       '<span class="num"><b class="tcode" style="background:'+tg.color+'">'+tg.code+' '+tg.num+'</b></span>' +
@@ -1399,6 +1418,7 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
       : '<input class="pqscore '+(v==null?'':band(v))+'" type="number" min="0" max="100" placeholder="%" value="'+esc(c.pqScore)+'" title="Score %">';
     var bits = [];
     if(!isRev(c)){
+      bits.push(videoLink(c.id, c.title));
       if(c.studyOn) bits.push('<span>Studied ' + pretty(c.studyOn) + '</span>');
       if(c.pqOn) bits.push('<span>Qs ' + pretty(c.pqOn) + '</span>');
       if(c.recall1On) bits.push('<span class="ok">Recall ✓ ' + pretty(c.recall1On) + '</span>');

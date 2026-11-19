@@ -564,9 +564,14 @@ details.ncomps > summary{cursor:pointer;font-size:12.5px;color:var(--muted);}
   // AnalystPrep's YouTube lesson for a module (videos.js). Modules without one
   // link to a search of AnalystPrep's channel instead.
   var VIDEOS = window.CFA_VIDEOS || {};
+  // An entry is a list of videos: one lesson, or its parts in order.
   function videoLink(id, title, short){
-    var v = VIDEOS[id];
-    if(v) return '<a class="vlink" href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'" target="_blank" rel="noopener" title="'+esc(v.title)+'">▶ '+(short ? 'Video' : 'AnalystPrep video')+(v.dur && !short ? ' · '+esc(v.dur) : '')+'</a>';
+    var vs = VIDEOS[id];
+    if(vs && !Array.isArray(vs)) vs = [vs];
+    if(vs && vs.length) return vs.map(function(v, i){
+      var label = vs.length > 1 ? 'Part ' + (i + 1) : (short ? 'Video' : 'AnalystPrep video');
+      return '<a class="vlink" href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'" target="_blank" rel="noopener" title="'+esc(v.title)+'">▶ '+label+(v.dur && !short ? ' · '+esc(v.dur) : '')+'</a>';
+    }).join(' ');
     if(short || !title) return '';
     return '<a class="vlink none" href="https://www.youtube.com/@AnalystPrep/search?query='+encodeURIComponent(title)+'" target="_blank" rel="noopener" title="No AnalystPrep video found for this module: search their channel">▶ Search AnalystPrep</a>';
   }

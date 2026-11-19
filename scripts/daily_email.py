@@ -272,11 +272,13 @@ def build(docs, comps, today):
         meta = " · ".join(x for x in [note, f"{done_n}/{len(names)} components done" if names else "",
                                        f"≈ {fmt_min(mins[c['id']])} left"] if x)
         ref = c.get("ref") if c.get("topic") == "rv" else c["id"]
-        vid = VIDEOS.get(ref or "")
-        watch = f"https://www.youtube.com/watch?v={vid['id']}" if vid else ""
-        text.append(f"- {code} {n} {title} ({meta})" + (f"\n    Video: {watch}" if watch else ""))
+        vids = VIDEOS.get(ref or "") or []
+        if isinstance(vids, dict):
+            vids = [vids]
+        links = [(("▶ Watch" if len(vids) == 1 else f"▶ Part {i + 1}"), f"https://www.youtube.com/watch?v={v['id']}") for i, v in enumerate(vids)]
+        text.append(f"- {code} {n} {title} ({meta})" + "".join(f"\n    {lbl[2:]}: {url}" for lbl, url in links))
         html.append(f'<div style="margin:0 0 14px">{chip(c)} <b>{escape(title)}</b>'
-                    + (f' <a href="{watch}" style="color:#C4302B;font-weight:600;text-decoration:none;font-size:13px">▶ Watch</a>' if watch else '')
+                    + "".join(f' <a href="{url}" style="color:#C4302B;font-weight:600;text-decoration:none;font-size:13px">{lbl}</a>' for lbl, url in links)
                     + f'<div style="color:{grey};font-size:12.5px;margin:3px 0 0">{escape(meta)}</div>')
         steps = left[c["id"]]
         if steps:
